@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidKotlinMultiplatformLibrary)
     alias(libs.plugins.androidLint)
+    alias(libs.plugins.sqlDelight)
 }
 
 kotlin {
@@ -60,13 +61,21 @@ kotlin {
         commonMain {
             dependencies {
                 implementation(libs.kotlin.stdlib)
-                // Add KMP dependencies here
+                implementation(libs.kotlinx.datetime)
+                // Koin
+                implementation(project.dependencies.platform(libs.koin.bom))
+                implementation(libs.koin.core)
+                implementation(libs.koin.compose.viewmodel)
+                // DateTime
+                implementation(libs.kotlinx.datetime)
             }
         }
 
         commonTest {
             dependencies {
+                // Koin
                 implementation(libs.kotlin.test)
+                implementation(libs.koin.test)
             }
         }
 
@@ -75,6 +84,9 @@ kotlin {
                 // Add Android-specific dependencies here. Note that this source set depends on
                 // commonMain by default and will correctly pull the Android artifacts of any KMP
                 // dependencies declared in commonMain.
+
+                // SQLDelight
+                implementation(libs.sqldelight.driver.android)
             }
         }
 
@@ -93,6 +105,9 @@ kotlin {
                 // part of KMP’s default source set hierarchy. Note that this source set depends
                 // on common by default and will correctly pull the iOS artifacts of any
                 // KMP dependencies declared in commonMain.
+
+                // SQLDelight
+                implementation(libs.sqldelight.driver.native)
             }
         }
     }
