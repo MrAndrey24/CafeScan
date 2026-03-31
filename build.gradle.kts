@@ -8,4 +8,21 @@ plugins {
     alias(libs.plugins.kotlinMultiplatform) apply false
     alias(libs.plugins.androidKotlinMultiplatformLibrary) apply false
     alias(libs.plugins.androidLint) apply false
+    alias(libs.plugins.spotless)
+}
+
+spotless{
+    ratchetFrom("origin/main")
+
+    kotlin {
+        target("**/src/**/*.kt")
+        targetExclude("**/build/**", "**/generated/**")
+        ktfmt()
+    }
+
+    kotlinGradle {
+        target("*.gradle.kts", "**/*.gradle.kts")
+        targetExclude("**/build/**")
+        ktfmt()
+    }
 }
