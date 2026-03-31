@@ -66,8 +66,16 @@ kotlin {
                 implementation(project.dependencies.platform(libs.koin.bom))
                 implementation(libs.koin.core)
                 implementation(libs.koin.compose.viewmodel)
+                implementation(libs.kotlinx.coroutines.core)
+
                 // DateTime
                 implementation(libs.kotlinx.datetime)
+
+                // Ktor
+                implementation(project.dependencies.platform(libs.ktor.bom))
+                implementation(libs.ktor.client.core)
+                implementation(libs.ktor.client.content.negotiation)
+                implementation(libs.ktor.serialization.kotlinx.json)
             }
         }
 
@@ -76,6 +84,10 @@ kotlin {
                 // Koin
                 implementation(libs.kotlin.test)
                 implementation(libs.koin.test)
+                // Coroutine
+                implementation(libs.kotlinx.coroutines.test)
+                // Ktor
+                implementation(libs.ktor.client.mock)
             }
         }
 
@@ -87,6 +99,8 @@ kotlin {
 
                 // SQLDelight
                 implementation(libs.sqldelight.driver.android)
+                // Coroutine
+                implementation(libs.kotlinx.coroutines.android)
             }
         }
 
@@ -108,8 +122,19 @@ kotlin {
 
                 // SQLDelight
                 implementation(libs.sqldelight.driver.native)
+                // Ktor
+                implementation(libs.ktor.client.darwin)
             }
         }
     }
 
+}
+
+sqldelight {
+    databases {
+        create("AppDatabase") {
+            packageName.set("io.github.mrandrey24.soda.data.local")
+        }
+    }
+    linkSqlite = true
 }
