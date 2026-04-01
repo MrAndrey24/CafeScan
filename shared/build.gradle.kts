@@ -114,6 +114,6 @@ kotlin {
 }
 
 sqldelight {
-  databases { create("AppDatabase") { packageName.set("io.github.mrandrey24.soda.data.local") } }
+  databases { create("AppDatabase") { packageName.set("io.github.mrandrey24.cafescan.data.local") } }
   linkSqlite = true
 }
