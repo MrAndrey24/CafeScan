@@ -1,4 +1,6 @@
-package io.github.mrandrey24.soda
+package io.github.mrandrey24.soda.components
+
+import io.github.mrandrey24.soda.getPlatform
 
 class Greeting {
     private val platform = getPlatform()
