@@ -15,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import io.github.mrandrey24.cafescan.components.Greeting
+import io.github.mrandrey24.cafescan.ui.theme.CafeScanTheme
 import org.jetbrains.compose.resources.painterResource
 import soda.composeapp.generated.resources.Res
 import soda.composeapp.generated.resources.compose_multiplatform
@@ -22,7 +23,7 @@ import soda.composeapp.generated.resources.compose_multiplatform
 @Composable
 @Preview
 fun App() {
-  MaterialTheme {
+  CafeScanTheme {
     var showContent by remember { mutableStateOf(false) }
     Column(
         modifier =
