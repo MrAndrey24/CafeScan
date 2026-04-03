@@ -30,6 +30,7 @@ kotlin {
       implementation(libs.compose.runtime)
       implementation(libs.compose.foundation)
       implementation(libs.compose.material3)
+      implementation(libs.compose.material.icons.extended)
       implementation(libs.compose.ui)
       implementation(libs.compose.components.resources)
       implementation(libs.compose.uiToolingPreview)
@@ -42,8 +43,12 @@ kotlin {
       implementation(libs.koin.compose)
       implementation(libs.koin.compose.viewmodel)
       implementation(libs.koin.compose.viewmodel.navigation)
+      // QRKit
+      implementation(libs.qr.kit)
       // Serialization
       implementation(libs.kotlinx.serialization.json)
+      // Navigation
+      implementation(libs.compose.navigation)
     }
     commonTest.dependencies { implementation(libs.kotlin.test) }
   }
