@@ -1,4 +1,4 @@
-package io.github.mrandrey24.cafescan.domain.product
+package io.github.mrandrey24.cafescan.domain.entities
 
 enum class StockStatus {
   HEALTHY,
