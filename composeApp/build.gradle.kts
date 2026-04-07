@@ -5,6 +5,7 @@ plugins {
   alias(libs.plugins.androidApplication)
   alias(libs.plugins.composeMultiplatform)
   alias(libs.plugins.composeCompiler)
+  alias(libs.plugins.kotlinxSerialization)
 }
 
 kotlin {
@@ -59,7 +60,7 @@ android {
   compileSdk = libs.versions.android.compileSdk.get().toInt()
 
   defaultConfig {
-    applicationId = "io.github.mrandrey24.soda"
+    applicationId = "io.github.mrandrey24.cafescan"
     minSdk = libs.versions.android.minSdk.get().toInt()
     targetSdk = libs.versions.android.targetSdk.get().toInt()
     versionCode = 1

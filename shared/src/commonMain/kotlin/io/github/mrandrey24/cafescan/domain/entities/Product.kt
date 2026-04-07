@@ -8,6 +8,9 @@ data class Product(
     val emoji: String = "",
     val isActive: Boolean = true,
 ) {
-    val margin: Double get() = price - cost
-    val marginPercent: Int get() = if (price > 0) ((margin / price) * 100).toInt() else 0
+  val margin: Double
+    get() = price - cost
+
+  val marginPercent: Int
+    get() = if (price > 0) ((margin / price) * 100).toInt() else 0
 }

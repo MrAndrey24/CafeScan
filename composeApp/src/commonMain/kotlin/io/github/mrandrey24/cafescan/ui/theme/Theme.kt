@@ -1,10 +1,21 @@
 package io.github.mrandrey24.cafescan.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Shapes
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.unit.dp
+
+// Artisan Ledger Shapes (ROUND_EIGHT strategy)
+val ArtisanShapes =
+    Shapes(
+        small = RoundedCornerShape(8.dp),
+        medium = RoundedCornerShape(12.dp),
+        large = RoundedCornerShape(16.dp),
+    )
 
 private val DarkColorScheme =
     darkColorScheme(
@@ -64,5 +75,10 @@ private val LightColorScheme =
 fun CafeScanTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
   val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
 
-  MaterialTheme(colorScheme = colorScheme, typography = AppTypography, content = content)
+  MaterialTheme(
+      colorScheme = colorScheme,
+      typography = AppTypography,
+      shapes = ArtisanShapes,
+      content = content,
+  )
 }
