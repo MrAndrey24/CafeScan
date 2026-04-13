@@ -1,6 +1,10 @@
 package io.github.mrandrey24.cafescan.domain.entities
 
-data class Sale(val id: String, val items: List<OrderItem>, val timestamp: Long) {
+data class Sale(
+  val id: String,
+  val items: List<OrderItem>,
+  val timestamp: Long
+) {
   val total: Double
     get() = items.sumOf { it.subtotal }
 

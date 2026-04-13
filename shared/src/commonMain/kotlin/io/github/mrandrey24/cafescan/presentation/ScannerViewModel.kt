@@ -19,7 +19,7 @@ class ScannerViewModel : ViewModel() {
             OrderItem(
                 product =
                     Product(
-                        id = "1",
+                        id = 1,
                         name = "Oat Milk Latte",
                         price = 4.50,
                         cost = 2.0,
@@ -30,7 +30,7 @@ class ScannerViewModel : ViewModel() {
             OrderItem(
                 product =
                     Product(
-                        id = "2",
+                        id = 2,
                         name = "Almond Croissant",
                         price = 3.75,
                         cost = 1.5,
@@ -41,7 +41,7 @@ class ScannerViewModel : ViewModel() {
             OrderItem(
                 product =
                     Product(
-                        id = "3",
+                        id = 3,
                         name = "Blueberry Muffin",
                         price = 2.95,
                         cost = 1.0,
@@ -58,7 +58,7 @@ class ScannerViewModel : ViewModel() {
     // For now, let's just log or add a dummy item if not already there
   }
 
-  fun updateQuantity(productId: String, delta: Int) {
+  fun updateQuantity(productId: Long, delta: Int) {
     _uiState.update { state ->
       val newBasket =
           state.basket

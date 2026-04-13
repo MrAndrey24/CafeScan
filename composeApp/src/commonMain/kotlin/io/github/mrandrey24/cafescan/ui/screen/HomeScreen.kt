@@ -56,13 +56,13 @@ fun HomeScreen(
       listOf(
           OrderItem(
               product =
-                  Product(id = "1", name = "Oat Milk Latte", price = 4.50, cost = 2.0, emoji = "☕"),
+                  Product(id = 1, name = "Oat Milk Latte", price = 4.50, cost = 2.0, emoji = "☕"),
               quantity = 1,
           ),
           OrderItem(
               product =
                   Product(
-                      id = "2",
+                      id = 2,
                       name = "Almond Croissant",
                       price = 3.75,
                       cost = 1.5,
@@ -73,7 +73,7 @@ fun HomeScreen(
           OrderItem(
               product =
                   Product(
-                      id = "3",
+                      id = 3,
                       name = "Blueberry Muffin",
                       price = 2.95,
                       cost = 1.0,

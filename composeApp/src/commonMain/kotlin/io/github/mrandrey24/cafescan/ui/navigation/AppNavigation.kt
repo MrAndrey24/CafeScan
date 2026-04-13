@@ -4,6 +4,9 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
+import io.github.mrandrey24.cafescan.presentation.ProductViewModel
+import io.github.mrandrey24.cafescan.presentation.QrPreviewViewModel
 import io.github.mrandrey24.cafescan.ui.screen.CatalogScreen
 import io.github.mrandrey24.cafescan.ui.screen.DashboardScreen
 import io.github.mrandrey24.cafescan.ui.screen.HomeScreen
@@ -12,6 +15,7 @@ import io.github.mrandrey24.cafescan.ui.screen.QrPreviewScreen
 import io.github.mrandrey24.cafescan.ui.screen.SaleDetailScreen
 import io.github.mrandrey24.cafescan.ui.screen.ScannerScreen
 import kotlinx.serialization.Serializable
+import org.koin.compose.viewmodel.koinViewModel
 
 @Serializable object HomeRoute
 
@@ -23,7 +27,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable object ProductFormRoute
 
-@Serializable object QrPreviewRoute
+@Serializable data class QrPreviewRoute(val productId: Long)
 
 @Serializable object SaleDetailRoute
 
@@ -31,7 +35,9 @@ import kotlinx.serialization.Serializable
 
 @Composable
 fun AppNavigation() {
-  val navController = rememberNavController()
+    val navController = rememberNavController()
+    val productViewModel = koinViewModel<ProductViewModel>()
+    val qrPreviewViewModel = koinViewModel<QrPreviewViewModel>()
 
   NavHost(navController = navController, startDestination = HomeRoute) {
     composable<HomeRoute> {
@@ -56,7 +62,8 @@ fun AppNavigation() {
           onNavigateToScanner = { navController.navigate(HomeRoute) },
           onNavigateToDashboard = { navController.navigate(DashboardRoute) },
           onNavigateToInventory = { navController.navigate(InventoryRoute) },
-          onNavigateToQrPreview = { navController.navigate(QrPreviewRoute) },
+          onNavigateToQrPreview = { id -> navController.navigate(QrPreviewRoute(id)) },
+          productViewModel
       )
     }
     composable<InventoryRoute> {
@@ -67,12 +74,15 @@ fun AppNavigation() {
           onNavigateToCatalog = { navController.navigate(CatalogRoute) },
       )
     }
-    composable<QrPreviewRoute> {
+    composable<QrPreviewRoute> { backStackEntry ->
+      val route: QrPreviewRoute = backStackEntry.toRoute()
       QrPreviewScreen(
+          productId = route.productId,
           onBack = { navController.popBackStack() },
           onNavigateToScanner = { navController.navigate(HomeRoute) },
           onNavigateToDashboard = { navController.navigate(DashboardRoute) },
           onNavigateToInventory = { navController.navigate(InventoryRoute) },
+          qrPreviewViewModel
       )
     }
     composable<SaleDetailRoute> { SaleDetailScreen(onBack = { navController.popBackStack() }) }

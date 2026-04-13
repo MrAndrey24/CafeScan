@@ -56,7 +56,7 @@ fun OrderItemRow(
                   ),
           contentAlignment = Alignment.Center,
       ) {
-        Text(item.product.emoji, fontSize = 24.sp)
+          item.product.emoji?.let { Text(it, fontSize = 24.sp) }
       }
 
       // Product Info

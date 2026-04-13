@@ -1,8 +1,8 @@
 package io.github.mrandrey24.cafescan.ui.screen
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,248 +26,289 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.github.mrandrey24.cafescan.presentation.QrPreviewViewModel
+import qrgenerator.QRCodeImage
+import qrgenerator.shareQrCodeImage
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun QrPreviewScreen(
+    productId: Long,
     onBack: () -> Unit,
     onNavigateToScanner: () -> Unit,
     onNavigateToDashboard: () -> Unit,
     onNavigateToInventory: () -> Unit,
+    viewModel: QrPreviewViewModel,
 ) {
-  val hardcodedJson = """{"id":"CAP-001","name":"Cappuccino","price":1800,"cost":900}"""
+    val uiState by viewModel.uiState.collectAsState()
 
-  Scaffold(
-      topBar = {
-        TopAppBar(
-            title = {
-              Column(
-                  horizontalAlignment = Alignment.CenterHorizontally,
-                  modifier = Modifier.fillMaxWidth(),
-              ) {
-                Text(
-                    "QR generated",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface,
+    LaunchedEffect(productId) {
+        viewModel.loadProduct(productId)
+    }
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        "QR generated",
+                        modifier   = Modifier.fillMaxWidth(),
+                        textAlign  = TextAlign.Center,
+                        style      = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color      = MaterialTheme.colorScheme.onSurface,
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back",
+                            tint = MaterialTheme.colorScheme.primary,
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent
+                ),
+            )
+        },
+        bottomBar = {
+            NavigationBar(
+                containerColor = MaterialTheme.colorScheme.surface,
+                contentColor   = MaterialTheme.colorScheme.onSurfaceVariant,
+                tonalElevation = 8.dp,
+            ) {
+                NavigationBarItem(
+                    selected = false,
+                    onClick  = onNavigateToScanner,
+                    icon     = { Icon(Icons.Default.QrCodeScanner, "Scanner") },
+                    label    = { Text("Scanner") },
                 )
-              }
-            },
-            navigationIcon = {
-              Row(
-                  verticalAlignment = Alignment.CenterVertically,
-                  modifier = Modifier.clickable { onBack() }.padding(8.dp),
-              ) {
-                Icon(
-                    Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back",
-                    tint = MaterialTheme.colorScheme.primary,
+                NavigationBarItem(
+                    selected = false,
+                    onClick  = onNavigateToDashboard,
+                    icon     = { Icon(Icons.Default.History, "Today") },
+                    label    = { Text("Today") },
                 )
-              }
-            },
-            colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
-        )
-      },
-      bottomBar = {
-        NavigationBar(
-            containerColor = MaterialTheme.colorScheme.surface,
-            contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-            tonalElevation = 8.dp,
-        ) {
-          NavigationBarItem(
-              selected = false,
-              onClick = onNavigateToScanner,
-              icon = { Icon(Icons.Default.QrCodeScanner, contentDescription = "Scanner") },
-              label = { Text("Scanner") },
-          )
-          NavigationBarItem(
-              selected = false,
-              onClick = onNavigateToDashboard,
-              icon = { Icon(Icons.Default.History, contentDescription = "Today") },
-              label = { Text("Today") },
-          )
-          NavigationBarItem(
-              selected = false,
-              onClick = onNavigateToInventory,
-              icon = { Icon(Icons.Default.Inventory, contentDescription = "Stock") },
-              label = { Text("Stock") },
-          )
-          NavigationBarItem(
-              selected = true,
-              onClick = { /* Already here */ },
-              icon = { Icon(Icons.Default.LocalOffer, contentDescription = "Catalog") },
-              label = { Text("Catalog") },
-              colors =
-                  NavigationBarItemDefaults.colors(
-                      selectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                      selectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                      indicatorColor = MaterialTheme.colorScheme.surfaceVariant,
-                  ),
-          )
+                NavigationBarItem(
+                    selected = false,
+                    onClick  = onNavigateToInventory,
+                    icon     = { Icon(Icons.Default.Inventory, "Stock") },
+                    label    = { Text("Stock") },
+                )
+                NavigationBarItem(
+                    selected = true,
+                    onClick  = { },
+                    icon     = { Icon(Icons.Default.LocalOffer, "Catalog") },
+                    label    = { Text("Catalog") },
+                    colors   = NavigationBarItemDefaults.colors(
+                        selectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        selectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        indicatorColor    = MaterialTheme.colorScheme.surfaceVariant,
+                    ),
+                )
+            }
+        },
+        containerColor = MaterialTheme.colorScheme.background,
+    ) { padding ->
+
+        if (uiState.isLoading) {
+            Box(
+                modifier          = Modifier.fillMaxSize().padding(padding),
+                contentAlignment  = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+            return@Scaffold
         }
-      },
-      containerColor = MaterialTheme.colorScheme.background,
-  ) { padding ->
-    Column(
-        modifier =
-            Modifier.fillMaxSize()
+
+        val product = uiState.product
+        if (product == null) {
+            Box(
+                modifier         = Modifier.fillMaxSize().padding(padding),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Text(
+                        "Could not load product",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.outline
+                    )
+                    TextButton(onClick = onBack) { Text("Go back") }
+                }
+            }
+            return@Scaffold
+        }
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
                 .padding(padding)
                 .padding(horizontal = 24.dp)
                 .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.spacedBy(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-      // QR Code Main Card
-      Card(
-          modifier = Modifier.fillMaxWidth().padding(top = 16.dp),
-          shape = MaterialTheme.shapes.large,
-          colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-          elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-      ) {
-        Column(
-            modifier = Modifier.fillMaxWidth().padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement   = Arrangement.spacedBy(24.dp),
+            horizontalAlignment   = Alignment.CenterHorizontally,
         ) {
-          // QR Placeholder
-          Box(
-              modifier =
-                  Modifier.size(200.dp)
-                      .background(
-                          MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
-                          RoundedCornerShape(12.dp),
-                      )
-                      .border(
-                          1.dp,
-                          MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
-                          RoundedCornerShape(12.dp),
-                      ),
-              contentAlignment = Alignment.Center,
-          ) {
-            Icon(
-                imageVector = Icons.Default.QrCodeScanner,
-                contentDescription = null,
-                modifier = Modifier.size(100.dp),
-                tint = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
-            )
-          }
 
-          // Product Details
-          Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            // QR Card
+            Card(
+                modifier  = Modifier.fillMaxWidth().padding(top = 16.dp),
+                shape     = MaterialTheme.shapes.large,
+                colors    = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                ),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
             ) {
-              Text("☕", fontSize = 20.sp)
-              Text(
-                  "Cappuccino",
-                  style = MaterialTheme.typography.titleMedium,
-                  fontWeight = FontWeight.Bold,
-              )
+                Column(
+                    modifier            = Modifier.fillMaxWidth().padding(24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                ) {
+
+                    if (product.qrString != null) {
+                        QRCodeImage(
+                            modifier = Modifier.size(200.dp),
+                            url = product.qrString!!,
+                            contentDescription = "QR de ${product.name}",
+                            onSuccess = { bitmap ->
+                                bitmap?.let { viewModel.onQrBitmapReady(it) }
+                            }
+                        )
+                    } else {
+                        Box(
+                            modifier         = Modifier
+                                .size(200.dp)
+                                .background(
+                                    MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                                    RoundedCornerShape(12.dp)
+                                )
+                                .border(
+                                    1.dp,
+                                    MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
+                                    RoundedCornerShape(12.dp)
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                "QR not available",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.outline
+                            )
+                        }
+                    }
+
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Row(
+                            verticalAlignment     = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            product.emoji?.let { Text(it, fontSize = 20.sp) }
+                            Text(
+                                product.name,
+                                style      = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                            )
+                        }
+                        val profit = product.price - product.cost
+                        Text(
+                            "₡${product.price} · profit ₡${profit}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.outline,
+                        )
+                    }
+                }
             }
-            Text(
-                "₡1,800 · profit ₡900",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.outline,
-            )
-          }
+
+            // Stats
+            val marginPercent = if (product.price > 0)
+                ((( product.price - product.cost) / product.price) * 100).toInt()
+            else 0
+
+            Row(
+                modifier              = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                StatSmallCard(
+                    label    = "Price",
+                    value    = "₡${product.price}",
+                    modifier = Modifier.weight(1f)
+                )
+                StatSmallCard(
+                    label      = "Profit",
+                    value      = "$marginPercent%",
+                    valueColor = MaterialTheme.colorScheme.tertiary,
+                    modifier   = Modifier.weight(1f)
+                )
+            }
+
+            // Action buttons
+            Column(
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+                modifier            = Modifier.padding(top = 8.dp),
+            ) {
+                Button(
+                    onClick  = { /* Print — Sprint 5 */ },
+                    modifier = Modifier.fillMaxWidth().height(56.dp),
+                    shape    = MaterialTheme.shapes.large,
+                    colors   = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.secondary,
+                        contentColor   = MaterialTheme.colorScheme.onSecondary,
+                    ),
+                ) {
+                    Text("Print QR", fontWeight = FontWeight.Bold)
+                }
+
+                OutlinedButton(
+                    onClick  = {
+                        uiState.qrBitmap?.let { shareQrCodeImage(it, product.name) }
+                    },
+                    enabled  = uiState.qrBitmap != null,
+                    modifier = Modifier.fillMaxWidth().height(56.dp),
+                    shape    = MaterialTheme.shapes.large,
+                    colors   = ButtonDefaults.outlinedButtonColors(
+                        contentColor = MaterialTheme.colorScheme.onSurface
+                    ),
+                    border   = BorderStroke(
+                        1.dp,
+                        MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
+                    ),
+                ) {
+                    Text("Share image", fontWeight = FontWeight.Bold)
+                }
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
         }
-      }
-
-      // QR Content Section
-      Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(
-            "QR CONTENT",
-            style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.outline,
-            fontWeight = FontWeight.Bold,
-            letterSpacing = 1.sp,
-        )
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            shape = MaterialTheme.shapes.medium,
-            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-        ) {
-          Text(
-              text = hardcodedJson,
-              modifier = Modifier.padding(16.dp),
-              style = MaterialTheme.typography.bodySmall,
-              fontFamily = FontFamily.Monospace,
-              color = MaterialTheme.colorScheme.onSurfaceVariant,
-          )
-        }
-      }
-
-      // Stats Row
-      Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-        StatSmallCard(label = "Price", value = "₡1,800", modifier = Modifier.weight(1f))
-        StatSmallCard(
-            label = "Profit",
-            value = "50%",
-            valueColor = MaterialTheme.colorScheme.tertiary,
-            modifier = Modifier.weight(1f),
-        )
-      }
-
-      // Action Buttons
-      Column(
-          verticalArrangement = Arrangement.spacedBy(12.dp),
-          modifier = Modifier.padding(top = 8.dp),
-      ) {
-        Button(
-            onClick = { /* Print */ },
-            modifier = Modifier.fillMaxWidth().height(56.dp),
-            shape = MaterialTheme.shapes.large,
-            colors =
-                ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.secondary,
-                    contentColor = MaterialTheme.colorScheme.onSecondary,
-                ),
-        ) {
-          Text("Print QR", fontWeight = FontWeight.Bold)
-        }
-
-        OutlinedButton(
-            onClick = { /* Share */ },
-            modifier = Modifier.fillMaxWidth().height(56.dp),
-            shape = MaterialTheme.shapes.large,
-            colors =
-                ButtonDefaults.outlinedButtonColors(
-                    contentColor = MaterialTheme.colorScheme.onSurface
-                ),
-            border =
-                androidx.compose.foundation.BorderStroke(
-                    1.dp,
-                    MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
-                ),
-        ) {
-          Text("Share image", fontWeight = FontWeight.Bold)
-        }
-      }
-
-      Spacer(modifier = Modifier.height(24.dp))
     }
-  }
 }
 
 @Composable

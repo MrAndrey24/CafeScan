@@ -18,6 +18,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -41,16 +42,17 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.github.mrandrey24.cafescan.presentation.ProductViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -59,15 +61,20 @@ fun CatalogScreen(
     onNavigateToScanner: () -> Unit,
     onNavigateToDashboard: () -> Unit,
     onNavigateToInventory: () -> Unit,
-    onNavigateToQrPreview: () -> Unit,
+    onNavigateToQrPreview: (Long) -> Unit,
+    viewModel: ProductViewModel,
 ) {
-  var productName by remember { mutableStateOf("Cappuccino") }
-  var price by remember { mutableStateOf("1800") }
-  var cost by remember { mutableStateOf("900") }
-  var stock by remember { mutableStateOf("20") }
-  var selectedEmoji by remember { mutableStateOf("☕") }
 
-  val emojis = listOf("☕", "🥐", "🍫", "🥤", "🧁", "🍵", "🥗")
+    val uiState by viewModel.uiState.collectAsState()
+    val emojis = listOf("☕", "🥐", "🍫", "🥤", "🧁", "🍵", "🥗")
+
+    LaunchedEffect(uiState.isSaved, uiState.savedProductId) {
+        if (uiState.isSaved && uiState.savedProductId != null) {
+            val id = uiState.savedProductId!!
+            viewModel.clearSaveState()
+            onNavigateToQrPreview(id)
+        }
+    }
 
   Scaffold(
       topBar = {
@@ -98,10 +105,11 @@ fun CatalogScreen(
               }
             },
             actions = {
-              TextButton(onClick = { /* Save */ }) {
+              TextButton(onClick = { viewModel.saveProduct() },
+                  enabled = uiState.isFormValid) {
                 Text(
                     "Save",
-                    color = MaterialTheme.colorScheme.primary,
+                    color = if (uiState.isFormValid) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onPrimary,
                     fontWeight = FontWeight.Bold,
                 )
               }
@@ -168,8 +176,8 @@ fun CatalogScreen(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             contentPadding = PaddingValues(vertical = 4.dp),
         ) {
-          items(emojis) { emoji ->
-            val isSelected = selectedEmoji == emoji
+            items(emojis) { itemEmoji ->
+            val isSelected = uiState.emoji == itemEmoji
             Box(
                 modifier =
                     Modifier.size(56.dp)
@@ -185,10 +193,10 @@ fun CatalogScreen(
                                 else MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
                             shape = RoundedCornerShape(12.dp),
                         )
-                        .clickable { selectedEmoji = emoji },
+                        .clickable { viewModel.onEmojiChange(itemEmoji) },
                 contentAlignment = Alignment.Center,
             ) {
-              Text(emoji, fontSize = 24.sp)
+              Text(itemEmoji, fontSize = 24.sp)
             }
           }
         }
@@ -202,8 +210,8 @@ fun CatalogScreen(
             color = MaterialTheme.colorScheme.outline,
         )
         OutlinedTextField(
-            value = productName,
-            onValueChange = { productName = it },
+            value = uiState.name,
+            onValueChange = {  viewModel.onNameChanged(it) },
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
             colors =
@@ -224,9 +232,11 @@ fun CatalogScreen(
               color = MaterialTheme.colorScheme.outline,
           )
           OutlinedTextField(
-              value = "₡ $price",
-              onValueChange = { price = it.removePrefix("₡ ").trim() },
+              value = uiState.price,
+              onValueChange = { viewModel.onPriceChange(it)},
+              prefix = { Text("₡ ") },
               shape = RoundedCornerShape(12.dp),
+              keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
               colors =
                   OutlinedTextFieldDefaults.colors(
                       focusedContainerColor = MaterialTheme.colorScheme.surface,
@@ -241,9 +251,11 @@ fun CatalogScreen(
               color = MaterialTheme.colorScheme.outline,
           )
           OutlinedTextField(
-              value = "₡ $cost",
-              onValueChange = { cost = it.removePrefix("₡ ").trim() },
+              value = uiState.cost,
+              onValueChange = { viewModel.onCostChange(it) },
+              prefix = { Text("₡ ") },
               shape = RoundedCornerShape(12.dp),
+              keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
               colors =
                   OutlinedTextFieldDefaults.colors(
                       focusedContainerColor = MaterialTheme.colorScheme.surface,
@@ -261,7 +273,7 @@ fun CatalogScreen(
             color = MaterialTheme.colorScheme.outline,
         )
         Text(
-            "₡900 · 50%",
+            "₡${uiState.margin} · ${uiState.marginPercent}%",
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.tertiary,
             fontWeight = FontWeight.Bold,
@@ -276,10 +288,11 @@ fun CatalogScreen(
             color = MaterialTheme.colorScheme.outline,
         )
         OutlinedTextField(
-            value = "$stock units",
-            onValueChange = { stock = it.removeSuffix(" units").trim() },
+            value = uiState.stock,
+            onValueChange = { viewModel.onStockChange(it) },
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             colors =
                 OutlinedTextFieldDefaults.colors(
                     focusedContainerColor = MaterialTheme.colorScheme.surface,
@@ -292,9 +305,12 @@ fun CatalogScreen(
 
       // Submit Button
       Button(
-          onClick = onNavigateToQrPreview,
+          onClick = {
+            viewModel.saveProduct()
+          },
           modifier = Modifier.fillMaxWidth().height(56.dp),
           shape = MaterialTheme.shapes.large,
+          enabled = uiState.isFormValid,
           colors =
               ButtonDefaults.buttonColors(
                   containerColor = MaterialTheme.colorScheme.secondary,
