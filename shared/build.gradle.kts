@@ -45,21 +45,20 @@ kotlin {
     commonMain {
       dependencies {
         implementation(libs.kotlin.stdlib)
+        // Coroutine
+        implementation(libs.kotlinx.coroutines.core)
         implementation(libs.kotlinx.datetime)
         // Koin
         implementation(project.dependencies.platform(libs.koin.bom))
         implementation(libs.koin.core)
         implementation(libs.koin.compose.viewmodel)
-        implementation(libs.kotlinx.coroutines.core)
-
-        // DateTime
-        implementation(libs.kotlinx.datetime)
-
         // Ktor
         implementation(project.dependencies.platform(libs.ktor.bom))
         implementation(libs.ktor.client.core)
         implementation(libs.ktor.client.content.negotiation)
         implementation(libs.ktor.serialization.kotlinx.json)
+        // QRKit
+        implementation(libs.qr.kit)
       }
     }
 
@@ -77,10 +76,8 @@ kotlin {
 
     androidMain {
       dependencies {
-        // Add Android-specific dependencies here. Note that this source set depends on
-        // commonMain by default and will correctly pull the Android artifacts of any KMP
-        // dependencies declared in commonMain.
-
+        // Ktor
+        implementation(libs.ktor.client.okhttp)
         // SQLDelight
         implementation(libs.sqldelight.driver.android)
         // Coroutine
@@ -98,12 +95,6 @@ kotlin {
 
     iosMain {
       dependencies {
-        // Add iOS-specific dependencies here. This a source set created by Kotlin Gradle
-        // Plugin (KGP) that each specific iOS target (e.g., iosX64) depends on as
-        // part of KMP’s default source set hierarchy. Note that this source set depends
-        // on common by default and will correctly pull the iOS artifacts of any
-        // KMP dependencies declared in commonMain.
-
         // SQLDelight
         implementation(libs.sqldelight.driver.native)
         // Ktor

@@ -1,62 +1,224 @@
-import kotlin.Boolean;
-
-CREATE TABLE Product (
+CREATE TABLE Products (
     id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
+    name TEXT NOT NULL UNIQUE,
     price REAL NOT NULL,
-    stock INTEGER NOT NULL
+    cost REAL NOT NULL,
+    emoji TEXT NOT NULL DEFAULT '=',
+    is_active INTEGER NOT NULL DEFAULT 1,
+    qr_string  TEXT NOT NULL,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL
 );
 
-CREATE TABLE Sale (
-    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-    productId INTEGER NOT NULL,
-    quantity INTEGER NOT NULL,
-    totalAmount REAL NOT NULL,
+CREATE TABLE Stocks (
+    product_id INTEGER NOT NULL PRIMARY KEY REFERENCES Products(id) ON DELETE CASCADE,
+    current_qty INTEGER NOT NULL DEFAULT 0,
+    initial_qty INTEGER NOT NULL DEFAULT 0,
+    low_stock_threshold INTEGER NOT NULL DEFAULT 3,
+    updated_at INTEGER NOT NULL
+);
+
+CREATE TABLE Sales (
+    id INTEGER NOT NULL PRIMARY KEY,
     timestamp INTEGER NOT NULL,
-    FOREIGN KEY (productId) REFERENCES Product(id)
+    total REAL NOT NULL,
+    profit REAL NOT NULL
 );
 
--- Product Queries
+CREATE TABLE SaleItems (
+    id         INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    sale_id    TEXT    NOT NULL REFERENCES Sales(id)    ON DELETE CASCADE,
+    product_id TEXT    NOT NULL REFERENCES Products(id) ON DELETE RESTRICT,
+    quantity   INTEGER NOT NULL,
+    unit_price REAL    NOT NULL,
+    unit_cost  REAL    NOT NULL,
+    subtotal   REAL    NOT NULL
+);
+
+-- PRODUCT QUERIES
+
 insertProduct:
-INSERT INTO Product (name, price, stock)
-VALUES (?, ?, ?);
+INSERT OR IGNORE INTO Products(
+    id, name, price, cost, emoji, qr_string, is_active, created_at, updated_at
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+insertOrIgnoreStock:
+INSERT OR IGNORE INTO Stocks(
+    product_id, current_qty, initial_qty, low_stock_threshold, updated_at
+) VALUES (?, ?, ?, ?, ?);
 
 updateProduct:
-UPDATE Product
-SET name = ?, price = ?, stock = ?
-WHERE id = ?;
+UPDATE Products
+SET name       = :name,
+    price      = :price,
+    cost       = :cost,
+    emoji      = :emoji,
+    qr_string  = :qrString,
+    is_active  = :isActive,
+    updated_at = :updatedAt
+WHERE id = :id;
+
+updateQrString:
+UPDATE Products
+SET qr_string = :qrString,
+    updated_at = :updateAt
+WHERE id = :id;
 
 deleteProduct:
-DELETE FROM Product
-WHERE id = ?;
+DELETE FROM Products
+WHERE id = :id;
+
+softDeleteProduct:
+UPDATE Products
+SET is_active = 0,
+    updated_at = :updated_at
+WHERE id = id;
 
 selectAllProducts:
-SELECT * FROM Product;
+SELECT * FROM Products;
 
 selectProductById:
-SELECT * FROM Product
-WHERE id = ?;
+SELECT *
+FROM Products
+WHERE id = :id;
 
-updateStock:
-UPDATE Product
-SET stock = stock - ?
-WHERE id = ?;
+findProductByName:
+SELECT COUNT(*) > 0
+FROM Products
+WHERE LOWER(name) = LOWER(:name)  -- case insensitive
+AND is_active = 1;
 
--- Sale Queries
+lastInsertRowId:
+SELECT last_insert_rowid();
+
+-- STOCK QUERIES
+
+getAllActiveWithStock:
+SELECT
+    p.id,
+    p.name,
+    p.price,
+    p.cost,
+    p.emoji,
+    p.qr_string,
+    p.is_active,
+    s.current_qty,
+    s.initial_qty,
+    s.low_stock_threshold,
+    s.updated_at AS stock_updated_at
+FROM Products p
+LEFT JOIN Stocks s ON s.product_id = p.id
+WHERE p.is_active = 1
+ORDER BY p.name ASC;
+
+-- Para el badge "QR listo" en CatalogScreen
+getProductsWithQrStatus:
+SELECT
+    p.id,
+    p.name,
+    p.price,
+    p.cost,
+    p.emoji,
+    p.qr_string,
+    p.is_active,
+    CASE WHEN p.qr_string != '' THEN 1 ELSE 0 END AS has_qr
+FROM Products p
+WHERE p.is_active = 1
+ORDER BY p.name ASC;
+
+-- ── STOCK ─────────────────────────────────────
+
+observeAllStock:
+SELECT
+    s.product_id,
+    s.current_qty,
+    s.initial_qty,
+    s.low_stock_threshold,
+    s.updated_at
+FROM Stocks s
+INNER JOIN Products p ON p.id = s.product_id
+WHERE p.is_active = 1
+ORDER BY p.name ASC;
+
+decrementStock:
+UPDATE Stocks
+SET current_qty = MAX(0, current_qty - :qty),
+    updated_at  = :updatedAt
+WHERE product_id = :productId;
+
+setInitialStock:
+UPDATE Stocks
+SET current_qty         = :qty,
+    initial_qty         = :qty,
+    updated_at          = :updatedAt
+WHERE product_id        = :productId;
+
+updateStockThreshold:
+UPDATE Stocks
+SET low_stock_threshold = :threshold,
+    updated_at          = :updatedAt
+WHERE product_id        = :productId;
+
+getStockByProductId:
+SELECT * FROM Stocks WHERE product_id = :productId;
+
+-- SALES QUERIES
 insertSale:
-INSERT INTO Sale (productId, quantity, totalAmount, timestamp)
-VALUES (?, ?, ?, ?);
+INSERT INTO Sales(id, timestamp, total, profit)
+VALUES (:id, :timestamp, :total, :profit);
 
-selectAllSales:
-SELECT * FROM Sale;
+insertSaleItem:
+INSERT INTO SaleItems(sale_id, product_id, quantity, unit_price, unit_cost, subtotal)
+VALUES (:saleId, :productId, :quantity, :unitPrice, :unitCost, :subtotal);
 
-selectSalesWithProduct:
-SELECT 
-    Sale.*,
-    Product.name AS productName
-FROM Sale
-JOIN Product ON Sale.productId = Product.id;
 
-selectSalesByProductId:
-SELECT * FROM Sale
-WHERE productId = ?;
+
+getSalesByDateRange:
+SELECT id, timestamp, total, profit
+FROM Sales
+WHERE timestamp >= :startMs AND timestamp < :endMs
+ORDER BY timestamp DESC;
+
+-- Trae los ítems de una venta con datos del producto
+getSaleItemsBySaleId:
+SELECT
+    si.id,
+    si.quantity,
+    si.unit_price,
+    si.unit_cost,
+    si.subtotal,
+    p.id         AS product_id,
+    p.name       AS product_name,
+    p.emoji      AS product_emoji,
+    p.qr_string  AS product_qr_string,
+    p.is_active  AS product_is_active
+FROM SaleItems si
+INNER JOIN Products p ON p.id = si.product_id
+WHERE si.sale_id = :saleId;
+
+-- Para el top product del dashboard
+getTopProductByDateRange:
+SELECT
+    p.id,
+    p.name,
+    p.emoji,
+    SUM(si.quantity) AS total_sold
+FROM SaleItems si
+INNER JOIN Products p ON p.id = si.product_id
+INNER JOIN Sales s    ON s.id  = si.sale_id
+WHERE s.timestamp >= :startMs AND s.timestamp < :endMs
+GROUP BY p.id
+ORDER BY total_sold DESC
+LIMIT 1;
+
+-- Para tendencias semanales
+getDailySalesSummary:
+SELECT
+    timestamp,
+    SUM(total)  AS day_total,
+    SUM(profit) AS day_profit,
+    COUNT(*)    AS sale_count
+FROM Sales
+WHERE timestamp >= :startMs AND timestamp < :endMs
+GROUP BY (timestamp / 86400000)
+ORDER BY timestamp ASC;
