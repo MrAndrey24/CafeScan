@@ -13,21 +13,13 @@ class ProductLocalDataSource(database: AppDatabase) : IProductLocalDataSource {
         return dbQuery.transactionWithResult {
             val now = Clock.System.now().toEpochMilliseconds()
 
-            val qrPayload = QrPayload(
-                name = product.name,
-                price = product.price.toString(),
-                cost = product.cost.toString()
-            )
-
-            val qrString = qrPayload.toString()
-
-            dbQuery.insertOrReplaceProduct(
+            dbQuery.insertProduct(
                 id = if (product.id == 0L) null else product.id,
                 name = product.name,
                 price = product.price,
                 cost = product.cost,
                 emoji = product.emoji ?: "",
-                qr_string = qrString,
+                qr_string = toString(),
                 is_active = if (product.isActive) 1L else 0L,
                 created_at = now,
                 updated_at = now
@@ -43,16 +35,41 @@ class ProductLocalDataSource(database: AppDatabase) : IProductLocalDataSource {
                 updated_at = now
             )
 
+            val qrPayload = QrPayload(
+                id = productId.toString(),
+                name = product.name,
+                price = product.price.toString(),
+                cost = product.cost.toString()
+
+            )
+
+            val qr = qrPayload.toString()
+
+            dbQuery.updateProduct(
+                id = productId,
+                name = product.name,
+                price = product.price,
+                cost = product.cost,
+                emoji = product.emoji ?: "",
+                isActive = 1L,
+                updatedAt = now,
+                qrString = qr
+            )
+
             productId
         }
     }
 
-    override fun getAllProducts(): List<Product> {
+    override suspend fun getAllProducts(): List<Product> {
         return dbQuery.selectAllProducts(::mapProductSelecting).executeAsList()
     }
 
-    override fun getProductById(id: Long): Product? {
+    override suspend fun getProductById(id: Long): Product? {
         return dbQuery.selectProductById(id, ::mapProductSelecting).executeAsOneOrNull()
+    }
+
+    override suspend fun getProductByName(name: String): Boolean {
+        return dbQuery.findProductByName(name).executeAsOne()
     }
 
     private fun mapProductSelecting(

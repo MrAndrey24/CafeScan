@@ -214,13 +214,23 @@ fun CatalogScreen(
             onValueChange = {  viewModel.onNameChanged(it) },
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
+            isError = uiState.isProductNameExists,
             colors =
                 OutlinedTextFieldDefaults.colors(
                     focusedContainerColor = MaterialTheme.colorScheme.surface,
                     unfocusedContainerColor = MaterialTheme.colorScheme.surface,
                     focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    errorBorderColor = MaterialTheme.colorScheme.error
                 ),
         )
+
+          if (uiState.isProductNameExists) {
+              Text(
+                  "Product name already exists",
+                  color = MaterialTheme.colorScheme.error,
+                  style = MaterialTheme.typography.labelSmall
+              )
+          }
       }
 
       // Price & Cost Row

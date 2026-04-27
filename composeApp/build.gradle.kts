@@ -46,6 +46,8 @@ kotlin {
       implementation(libs.koin.compose.viewmodel.navigation)
       // QRKit
       implementation(libs.qr.kit)
+      // CameraK
+      implementation(libs.camerak.qr.scanner)
       // Serialization
       implementation(libs.kotlinx.serialization.json)
       // Navigation

@@ -27,12 +27,18 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -40,6 +46,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.mrandrey24.cafescan.domain.entities.OrderItem
 import io.github.mrandrey24.cafescan.domain.entities.Product
+import io.github.mrandrey24.cafescan.presentation.ScannerViewModel
+import io.github.mrandrey24.cafescan.presentation.state.ScanError
 import io.github.mrandrey24.cafescan.ui.components.OrderItemRow
 import io.github.mrandrey24.cafescan.ui.components.QrPreviewCard
 
@@ -49,44 +57,25 @@ fun HomeScreen(
     onNavigateToDashboard: () -> Unit,
     onNavigateToInventory: () -> Unit,
     onNavigateToCatalog: () -> Unit,
-    onNavigateToScanner: () -> Unit,
+//    onNavigateToScanner: () -> Unit,
+    viewModel: ScannerViewModel
 ) {
-  // Hardcoded data to match the PNG
-  val hardcodedItems =
-      listOf(
-          OrderItem(
-              product =
-                  Product(id = 1, name = "Oat Milk Latte", price = 4.50, cost = 2.0, emoji = "☕"),
-              quantity = 1,
-          ),
-          OrderItem(
-              product =
-                  Product(
-                      id = 2,
-                      name = "Almond Croissant",
-                      price = 3.75,
-                      cost = 1.5,
-                      emoji = "🥐",
-                  ),
-              quantity = 2,
-          ),
-          OrderItem(
-              product =
-                  Product(
-                      id = 3,
-                      name = "Blueberry Muffin",
-                      price = 2.95,
-                      cost = 1.0,
-                      emoji = "🧁",
-                  ),
-              quantity = 1,
-          ),
-      )
+    val uiState by viewModel.uiState.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
 
-  val totalItems = hardcodedItems.sumOf { it.quantity }
-  val totalAmount = hardcodedItems.sumOf { it.subtotal }
+    LaunchedEffect(uiState.scanError) {
+        when (uiState.scanError) {
+            is ScanError.InvalidFormat   ->
+                snackbarHostState.showSnackbar("QR inválido — no es un producto de CaféScan")
+            is ScanError.ProductNotFound ->
+                snackbarHostState.showSnackbar("Producto no encontrado en el catálogo")
+            null -> Unit
+        }
+        viewModel.clearScanError()
+    }
 
   Scaffold(
+      snackbarHost = { SnackbarHost(snackbarHostState) },
       topBar = {
         TopAppBar(
             title = {
@@ -115,7 +104,7 @@ fun HomeScreen(
                               .background(MaterialTheme.colorScheme.primary, CircleShape)
                   )
                   Text(
-                      "$totalItems items",
+                      "${uiState.totalItems} items",
                       style = MaterialTheme.typography.labelMedium,
                       fontWeight = FontWeight.SemiBold,
                       color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -176,7 +165,9 @@ fun HomeScreen(
     ) {
       // Scanner Section
       item {
-        QrPreviewCard(onScan = { /* No-op for now */ }, modifier = Modifier.padding(top = 8.dp))
+        QrPreviewCard(
+            onScan = { rawString -> viewModel.onQrScanned(rawString) },
+            modifier = Modifier.padding(top = 8.dp))
       }
 
       // Basket Header
@@ -192,18 +183,21 @@ fun HomeScreen(
               fontWeight = FontWeight.Bold,
               color = MaterialTheme.colorScheme.onSurface,
           )
-          TextButton(onClick = { /* No-op */ }) {
+          TextButton(onClick = { viewModel.clearBasket() }) {
             Text("Clear all", color = MaterialTheme.colorScheme.primary)
           }
         }
       }
 
       // Basket Items
-      items(hardcodedItems) { item ->
+      items(
+          uiState.basket,
+          key = { it.product.id }
+      ) { item ->
         OrderItemRow(
             item = item,
-            onIncrease = { item.quantity++ },
-            onDecrease = { item.quantity-- },
+            onIncrease = { viewModel.onIncreaseQty(item.product.id.toString()) },
+            onDecrease = { viewModel.onDecreaseQty(item.product.id.toString()) },
         )
       }
 
@@ -222,7 +216,7 @@ fun HomeScreen(
               modifier = Modifier.padding(bottom = 4.dp),
           )
           Text(
-              "$$totalAmount",
+              "$${uiState.totalAmount}",
               style = MaterialTheme.typography.headlineLarge,
               fontWeight = FontWeight.Bold,
               color = MaterialTheme.colorScheme.onSurface,

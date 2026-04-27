@@ -10,12 +10,16 @@ class ProductRepository(private val localProductDataSource: IProductLocalDataSou
        return localProductDataSource.createProduct(product)
     }
 
-    override fun retrieveAllProducts(): List<Product> {
+    override suspend fun retrieveAllProducts(): List<Product> {
         return localProductDataSource.getAllProducts()
     }
 
-    override fun retrieveProductById(id: Long): Product? {
+    override suspend fun retrieveProductById(id: Long): Product? {
         return localProductDataSource.getProductById(id)
+    }
+
+    override suspend fun isNameExists(name: String): Boolean {
+        return localProductDataSource.getProductByName(name)
     }
 
 }

@@ -5,6 +5,8 @@ import androidx.lifecycle.viewModelScope
 import io.github.mrandrey24.cafescan.data.repository.product.IProductRepository
 import io.github.mrandrey24.cafescan.domain.entities.Product
 import io.github.mrandrey24.cafescan.presentation.state.ProductUiState
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,6 +18,7 @@ class ProductViewModel(
 ): ViewModel() {
     private val _uiState = MutableStateFlow(ProductUiState())
     val uiState: StateFlow<ProductUiState> = _uiState.asStateFlow()
+    private var nameCheckJob: Job? = null
 
     fun saveProduct() {
         val state = _uiState.value
@@ -37,11 +40,25 @@ class ProductViewModel(
         }
     }
 
-    fun onNameChanged(name: String) = _uiState.update { it.copy(name = name) }
+    fun onNameChanged(name: String) {
+        _uiState.update { it.copy(name = name, isProductNameExists = false) }
+
+        nameCheckJob?.cancel()
+        if (name.isBlank()) return
+
+        nameCheckJob = viewModelScope.launch {
+            delay(400)
+            val exists = productRepository.isNameExists(name.trim())
+            _uiState.update { it.copy(isProductNameExists = exists) }
+        }
+
+    }
     fun onPriceChange(price: String) = _uiState.update { it.copy(price = price) }
     fun onCostChange(cost: String) = _uiState.update { it.copy(cost = cost) }
     fun onStockChange(stock: String) = _uiState.update { it.copy(stock = stock) }
     fun onEmojiChange(emoji: String) = _uiState.update { it.copy(emoji = emoji) }
-
     fun clearSaveState() = _uiState.update { it.copy(isSaved = false, savedProductId = null) }
+    fun clearError() {
+        _uiState.update { it.copy(errorMessage = null) }
+    }
 }

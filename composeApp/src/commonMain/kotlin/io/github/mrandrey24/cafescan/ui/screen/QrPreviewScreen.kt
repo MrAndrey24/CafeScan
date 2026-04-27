@@ -205,7 +205,7 @@ fun QrPreviewScreen(
                         )
                     } else {
                         Box(
-                            modifier         = Modifier
+                            modifier = Modifier
                                 .size(200.dp)
                                 .background(
                                     MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),

@@ -8,6 +8,7 @@ data class ProductUiState(
     val emoji: String = "",
     val isSaving: Boolean = false,
     val isSaved: Boolean = false,
+    val isProductNameExists: Boolean = false,
     val savedProductId: Long? = null,
     val errorMessage: String? = null
 ) {
@@ -24,6 +25,6 @@ data class ProductUiState(
     val isStockValid: Boolean get() = stock.toLongOrNull() != null && stockInt >= 0
     val isEmojiValid: Boolean get() = emoji.isNotBlank()
     val isFormValid:  Boolean get() =
-        isNameValid && isPriceValid && isCostValid && isStockValid && isEmojiValid
+        isNameValid && isPriceValid && isCostValid && isStockValid && isEmojiValid && !isProductNameExists
 
 }

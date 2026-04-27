@@ -1,6 +1,6 @@
 CREATE TABLE Products (
     id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
+    name TEXT NOT NULL UNIQUE,
     price REAL NOT NULL,
     cost REAL NOT NULL,
     emoji TEXT NOT NULL DEFAULT '=',
@@ -37,8 +37,8 @@ CREATE TABLE SaleItems (
 
 -- PRODUCT QUERIES
 
-insertOrReplaceProduct:
-INSERT OR REPLACE INTO Products(
+insertProduct:
+INSERT OR IGNORE INTO Products(
     id, name, price, cost, emoji, qr_string, is_active, created_at, updated_at
 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
 
@@ -58,6 +58,12 @@ SET name       = :name,
     updated_at = :updatedAt
 WHERE id = :id;
 
+updateQrString:
+UPDATE Products
+SET qr_string = :qrString,
+    updated_at = :updateAt
+WHERE id = :id;
+
 deleteProduct:
 DELETE FROM Products
 WHERE id = :id;
@@ -75,6 +81,12 @@ selectProductById:
 SELECT *
 FROM Products
 WHERE id = :id;
+
+findProductByName:
+SELECT COUNT(*) > 0
+FROM Products
+WHERE LOWER(name) = LOWER(:name)  -- case insensitive
+AND is_active = 1;
 
 lastInsertRowId:
 SELECT last_insert_rowid();

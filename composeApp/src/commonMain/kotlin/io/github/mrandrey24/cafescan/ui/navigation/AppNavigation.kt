@@ -7,6 +7,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import io.github.mrandrey24.cafescan.presentation.ProductViewModel
 import io.github.mrandrey24.cafescan.presentation.QrPreviewViewModel
+import io.github.mrandrey24.cafescan.presentation.ScannerViewModel
 import io.github.mrandrey24.cafescan.ui.screen.CatalogScreen
 import io.github.mrandrey24.cafescan.ui.screen.DashboardScreen
 import io.github.mrandrey24.cafescan.ui.screen.HomeScreen
@@ -38,6 +39,7 @@ fun AppNavigation() {
     val navController = rememberNavController()
     val productViewModel = koinViewModel<ProductViewModel>()
     val qrPreviewViewModel = koinViewModel<QrPreviewViewModel>()
+    val scannerViewModel = koinViewModel<ScannerViewModel>()
 
   NavHost(navController = navController, startDestination = HomeRoute) {
     composable<HomeRoute> {
@@ -45,7 +47,8 @@ fun AppNavigation() {
           onNavigateToDashboard = { navController.navigate(DashboardRoute) },
           onNavigateToInventory = { navController.navigate(InventoryRoute) },
           onNavigateToCatalog = { navController.navigate(CatalogRoute) },
-          onNavigateToScanner = { /* Already here */ },
+//          onNavigateToScanner = { navController.navigate(HomeScreen()) },
+          scannerViewModel,
       )
     }
     composable<DashboardRoute> {

@@ -1,81 +1,94 @@
 package io.github.mrandrey24.cafescan.presentation
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import io.github.mrandrey24.cafescan.data.repository.product.IProductRepository
 import io.github.mrandrey24.cafescan.domain.entities.OrderItem
-import io.github.mrandrey24.cafescan.domain.entities.Product
+import io.github.mrandrey24.cafescan.domain.entities.QrPayload
+import io.github.mrandrey24.cafescan.presentation.state.ScanError
 import io.github.mrandrey24.cafescan.presentation.state.ScannerUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
-class ScannerViewModel : ViewModel() {
+class ScannerViewModel(
+    private val productRepository: IProductRepository
+) : ViewModel() {
   private val _uiState = MutableStateFlow(ScannerUiState())
   val uiState = _uiState.asStateFlow()
 
-  init {
-    // Mock data to match the PNG
-    val mockItems =
-        listOf(
-            OrderItem(
-                product =
-                    Product(
-                        id = 1,
-                        name = "Oat Milk Latte",
-                        price = 4.50,
-                        cost = 2.0,
-                        emoji = "☕",
-                    ),
-                quantity = 1,
-            ),
-            OrderItem(
-                product =
-                    Product(
-                        id = 2,
-                        name = "Almond Croissant",
-                        price = 3.75,
-                        cost = 1.5,
-                        emoji = "🥐",
-                    ),
-                quantity = 2,
-            ),
-            OrderItem(
-                product =
-                    Product(
-                        id = 3,
-                        name = "Blueberry Muffin",
-                        price = 2.95,
-                        cost = 1.0,
-                        emoji = "🧁",
-                    ),
-                quantity = 1,
-            ),
-        )
-    _uiState.update { it.copy(basket = mockItems) }
-  }
+  fun onQrScanned(rawString: String) {
+    viewModelScope.launch {
+        try {
+            val payload = QrPayload.fromQrString(rawString)
 
-  fun onQrScanned(payload: String) {
-    // Basic implementation: find product or add new one
-    // For now, let's just log or add a dummy item if not already there
-  }
+            if (payload == null) {
+                _uiState.update { it.copy(scanError = ScanError.InvalidFormat) }
+                return@launch
+            }
 
-  fun updateQuantity(productId: Long, delta: Int) {
-    _uiState.update { state ->
-      val newBasket =
-          state.basket
-              .map { item ->
-                if (item.product.id == productId) {
-                  val newQty = (item.quantity + delta).coerceAtLeast(0)
-                  item.copy(quantity = newQty)
+            val product = productRepository.retrieveProductById(payload.id.toLong())
+
+            if (product == null) {
+                _uiState.update { it.copy(scanError = ScanError.ProductNotFound) }
+                return@launch
+            }
+
+            _uiState.update { state ->
+                val existing = state.basket.find { it.product.id == product.id }
+                val updatedOrder = if (existing != null) {
+                    state.basket.map {
+                        if (it.product.id == product.id) it.copy(quantity = it.quantity + 1)
+                        else it
+                    }
                 } else {
-                  item
+                    state.basket + OrderItem(product = product, quantity = 1)
                 }
-              }
-              .filter { it.quantity > 0 }
-      state.copy(basket = newBasket)
+                state.copy(
+                    basket   = updatedOrder,
+                    scannedProduct = product,
+                    scanError      = null
+                )
+            }
+        } catch (e: Exception) {
+            _uiState.update { it.copy(errorMessage = e.message) }
+        }
     }
   }
 
-  fun clearBasket() {
-    _uiState.update { it.copy(basket = emptyList()) }
-  }
+    fun onIncreaseQty(productId: String) {
+        _uiState.update { state ->
+            state.copy(basket = state.basket.map {
+                if (it.product.id == productId.toLong()) it.copy(quantity = it.quantity + 1) else it
+            })
+        }
+    }
+
+    fun onDecreaseQty(productId: String) {
+        _uiState.update { state ->
+            val updated = state.basket.mapNotNull {
+                when {
+                    it.product.id != productId.toLong() -> it
+                    it.quantity > 1 -> it.copy(quantity = it.quantity - 1)
+                    else -> null
+                }
+            }
+            state.copy(basket = updated)
+        }
+    }
+
+    fun clearBasket() {
+        _uiState.update { it.copy(basket = emptyList()) }
+    }
+
+    fun clearScanError() {
+        _uiState.update { it.copy(scanError = null) }
+    }
+
+    fun clearOrder() {
+        _uiState.update { ScannerUiState() }
+    }
+
+
 }
