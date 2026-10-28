@@ -61,7 +61,6 @@ fun CatalogScreen(
     onNavigateToScanner: () -> Unit,
     onNavigateToDashboard: () -> Unit,
     onNavigateToInventory: () -> Unit,
-    onNavigateToQrPreview: (Long) -> Unit,
     viewModel: ProductViewModel,
 ) {
 
@@ -70,9 +69,8 @@ fun CatalogScreen(
 
     LaunchedEffect(uiState.isSaved, uiState.savedProductId) {
         if (uiState.isSaved && uiState.savedProductId != null) {
-            val id = uiState.savedProductId!!
             viewModel.clearSaveState()
-            onNavigateToQrPreview(id)
+            onNavigateToInventory()
         }
     }
 

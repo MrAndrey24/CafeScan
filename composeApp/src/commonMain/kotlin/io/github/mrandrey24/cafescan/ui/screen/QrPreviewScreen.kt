@@ -51,7 +51,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import io.github.mrandrey24.cafescan.presentation.QrPreviewViewModel
+import io.github.mrandrey24.cafescan.presentation.QrViewModel
 import qrgenerator.QRCodeImage
 import qrgenerator.shareQrCodeImage
 
@@ -63,7 +63,7 @@ fun QrPreviewScreen(
     onNavigateToScanner: () -> Unit,
     onNavigateToDashboard: () -> Unit,
     onNavigateToInventory: () -> Unit,
-    viewModel: QrPreviewViewModel,
+    viewModel: QrViewModel,
 ) {
     val uiState by viewModel.uiState.collectAsState()
 

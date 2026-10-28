@@ -2,8 +2,9 @@ package io.github.mrandrey24.cafescan.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import io.github.mrandrey24.cafescan.data.repository.product.IProductRepository
 import io.github.mrandrey24.cafescan.domain.entities.Product
+import io.github.mrandrey24.cafescan.domain.usecases.product.CheckProductNameExistsUseCase
+import io.github.mrandrey24.cafescan.domain.usecases.product.SaveProductUseCase
 import io.github.mrandrey24.cafescan.presentation.state.ProductUiState
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -14,7 +15,8 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class ProductViewModel(
-    private val productRepository: IProductRepository,
+    private val saveProductUseCase: SaveProductUseCase,
+    private val checkProductNameExistsUseCase: CheckProductNameExistsUseCase,
 ): ViewModel() {
     private val _uiState = MutableStateFlow(ProductUiState())
     val uiState: StateFlow<ProductUiState> = _uiState.asStateFlow()
@@ -32,8 +34,8 @@ class ProductViewModel(
                     emoji = state.emoji,
                     stock = state.stockInt
                 )
-                val productId = productRepository.saveProduct(product)
-                _uiState.update { it.copy(isSaving = false, isSaved = true, savedProductId = productId) }
+                val savedProduct = saveProductUseCase(product)
+                _uiState.update { it.copy(isSaving = false, isSaved = true, savedProductId = savedProduct.id) }
             } catch (e: Exception) {
                 _uiState.update { it.copy(isSaving = false, errorMessage = e.message) }
             }
@@ -48,11 +50,11 @@ class ProductViewModel(
 
         nameCheckJob = viewModelScope.launch {
             delay(400)
-            val exists = productRepository.isNameExists(name.trim())
+            val exists = checkProductNameExistsUseCase(name.trim())
             _uiState.update { it.copy(isProductNameExists = exists) }
         }
-
     }
+
     fun onPriceChange(price: String) = _uiState.update { it.copy(price = price) }
     fun onCostChange(cost: String) = _uiState.update { it.copy(cost = cost) }
     fun onStockChange(stock: String) = _uiState.update { it.copy(stock = stock) }
