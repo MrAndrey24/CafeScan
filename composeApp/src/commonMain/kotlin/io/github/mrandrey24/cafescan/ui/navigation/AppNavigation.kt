@@ -13,6 +13,7 @@ import io.github.mrandrey24.cafescan.ui.screen.CatalogScreen
 import io.github.mrandrey24.cafescan.ui.screen.DashboardScreen
 import io.github.mrandrey24.cafescan.ui.screen.HomeScreen
 import io.github.mrandrey24.cafescan.ui.screen.InventoryScreen
+import io.github.mrandrey24.cafescan.ui.screen.LowStockScreen
 import io.github.mrandrey24.cafescan.ui.screen.QrPreviewScreen
 import io.github.mrandrey24.cafescan.ui.screen.SaleDetailScreen
 import io.github.mrandrey24.cafescan.ui.screen.ScannerScreen
@@ -26,6 +27,8 @@ import org.koin.compose.viewmodel.koinViewModel
 @Serializable object CatalogRoute
 
 @Serializable object InventoryRoute
+
+@Serializable object LowStockRoute
 
 @Serializable object ProductFormRoute
 
@@ -72,6 +75,16 @@ fun AppNavigation() {
     }
     composable<InventoryRoute> {
       InventoryScreen(
+          onBack = { navController.popBackStack() },
+          onNavigateToScanner = { navController.navigate(HomeRoute) },
+          onNavigateToDashboard = { navController.navigate(DashboardRoute) },
+          onNavigateToCatalog = { navController.navigate(CatalogRoute) },
+          onNavigateToLowStock = { navController.navigate(LowStockRoute) },
+          inventoryViewModel
+      )
+    }
+    composable<LowStockRoute> {
+      LowStockScreen(
           onBack = { navController.popBackStack() },
           onNavigateToScanner = { navController.navigate(HomeRoute) },
           onNavigateToDashboard = { navController.navigate(DashboardRoute) },

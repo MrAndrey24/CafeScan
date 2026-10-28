@@ -9,4 +9,8 @@ class InventoryRepository(
     override suspend fun getAllActiveWithStock(): List<StockItem> {
         return inventoryLocalDataSource.getAllActiveWithStock()
     }
+
+    override suspend fun updateStockAndPrice(productId: Long, currentQty: Int, price: Double) {
+        inventoryLocalDataSource.updateStockAndPrice(productId, currentQty, price)
+    }
 }

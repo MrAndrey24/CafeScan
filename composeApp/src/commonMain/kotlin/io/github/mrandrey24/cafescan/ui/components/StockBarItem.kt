@@ -1,6 +1,7 @@
 package io.github.mrandrey24.cafescan.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,8 +12,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -36,9 +41,12 @@ fun StockBarItem(
     badgeLabel: String? = null,
     badgeColor: Color = MaterialTheme.colorScheme.error,
     emoji: String = "",
+    onEditClick: (() -> Unit)? = null,
 ) {
   Card(
-      modifier = Modifier.fillMaxWidth(),
+      modifier = Modifier
+          .fillMaxWidth()
+          .then(if (onEditClick != null) Modifier.clickable { onEditClick() } else Modifier),
       shape = RoundedCornerShape(16.dp),
       colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
       elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
@@ -84,15 +92,33 @@ fun StockBarItem(
           }
         }
 
-        if (badgeLabel != null) {
-          Surface(color = badgeColor, shape = RoundedCornerShape(8.dp)) {
-            Text(
-                text = badgeLabel,
-                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onError,
-                fontWeight = FontWeight.Bold,
-            )
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+          if (badgeLabel != null) {
+            Surface(color = badgeColor, shape = RoundedCornerShape(8.dp)) {
+              Text(
+                  text = badgeLabel,
+                  modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+                  style = MaterialTheme.typography.labelSmall,
+                  color = MaterialTheme.colorScheme.onError,
+                  fontWeight = FontWeight.Bold,
+              )
+            }
+          }
+          if (onEditClick != null) {
+            IconButton(
+                onClick = onEditClick,
+                modifier = Modifier.size(32.dp)
+            ) {
+              Icon(
+                  imageVector = Icons.Default.Edit,
+                  contentDescription = "Edit Stock and Price",
+                  tint = MaterialTheme.colorScheme.primary,
+                  modifier = Modifier.size(18.dp)
+              )
+            }
           }
         }
       }
