@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class QrPreviewViewModel(
+class QrViewModel(
     private val productRepository: IProductRepository
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(QrPreviewUiState())

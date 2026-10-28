@@ -8,8 +8,7 @@ import kotlin.time.Clock
 class ProductLocalDataSource(database: AppDatabase) : IProductLocalDataSource {
     private val dbQuery = database.appDatabaseQueries
 
-
-    override fun createProduct(product: Product): Long {
+    override fun createProduct(product: Product): Product {
         return dbQuery.transactionWithResult {
             val now = Clock.System.now().toEpochMilliseconds()
 
@@ -19,7 +18,7 @@ class ProductLocalDataSource(database: AppDatabase) : IProductLocalDataSource {
                 price = product.price,
                 cost = product.cost,
                 emoji = product.emoji ?: "",
-                qr_string = toString(),
+                qr_string = product.qrString ?: "",
                 is_active = if (product.isActive) 1L else 0L,
                 created_at = now,
                 updated_at = now
@@ -40,10 +39,9 @@ class ProductLocalDataSource(database: AppDatabase) : IProductLocalDataSource {
                 name = product.name,
                 price = product.price.toString(),
                 cost = product.cost.toString()
-
             )
 
-            val qr = qrPayload.toString()
+            val qr = qrPayload.toQrString()
 
             dbQuery.updateProduct(
                 id = productId,
@@ -51,12 +49,17 @@ class ProductLocalDataSource(database: AppDatabase) : IProductLocalDataSource {
                 price = product.price,
                 cost = product.cost,
                 emoji = product.emoji ?: "",
-                isActive = 1L,
+                isActive = if (product.isActive) 1L else 0L,
                 updatedAt = now,
                 qrString = qr
             )
 
-            productId
+            product.copy(
+                id = productId,
+                qrString = qr,
+                createdAt = if (product.createdAt == 0L) now else product.createdAt,
+                updatedAt = now
+            )
         }
     }
 

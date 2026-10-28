@@ -6,7 +6,7 @@ data class QrPayload(
   val price: String,
   val cost: String
 ) {
-  fun toQrString(): String = """{""id":"$id""name":"$name","price":$price,"cost":$cost}"""
+  fun toQrString(): String = """{"id":"$id","name":"$name","price":$price,"cost":$cost}"""
 
   companion object {
     fun fromQrString(raw: String): QrPayload? = runCatching {
