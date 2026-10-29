@@ -55,6 +55,13 @@ SET name       = :name,
     updated_at = :updatedAt
 WHERE id = :id;
 
+updateProductPriceAndQr:
+UPDATE Products
+SET price      = :price,
+    qr_string  = :qrString,
+    updated_at = :updatedAt
+WHERE id = :id;
+
 updateQrString:
 UPDATE Products
 SET qr_string = :qrString, updated_at = :updatedAt   -- arreglé el typo "updateAt"
@@ -125,8 +132,6 @@ FROM Products p
 WHERE p.is_active = 1
 ORDER BY p.name ASC;
 
--- ── STOCK ─────────────────────────────────────
-
 observeAllStock:
 SELECT
     s.product_id,
@@ -164,13 +169,6 @@ SET current_qty = :currentQty,
     initial_qty = CASE WHEN :currentQty > initial_qty THEN :currentQty ELSE initial_qty END,
     updated_at  = :updatedAt
 WHERE product_id = :productId;
-
-updateProductPriceAndQr:
-UPDATE Products
-SET price      = :price,
-    qr_string  = :qrString,
-    updated_at = :updatedAt
-WHERE id = :id;
 
 getStockByProductId:
 SELECT * FROM Stocks WHERE product_id = :productId;
