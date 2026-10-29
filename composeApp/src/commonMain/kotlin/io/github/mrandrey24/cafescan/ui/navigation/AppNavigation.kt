@@ -70,6 +70,7 @@ fun AppNavigation() {
           onNavigateToScanner = { navController.navigate(HomeRoute) },
           onNavigateToDashboard = { navController.navigate(DashboardRoute) },
           onNavigateToInventory = { navController.navigate(InventoryRoute) },
+          onNavigateToQrPreview = { navController.navigate(QrPreviewRoute(productId = it)) },
           productViewModel
       )
     }

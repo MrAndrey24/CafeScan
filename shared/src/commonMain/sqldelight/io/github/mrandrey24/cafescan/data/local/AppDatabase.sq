@@ -1,5 +1,5 @@
 CREATE TABLE Products (
-    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    id INTEGER NOT NULL PRIMARY KEY,
     name TEXT NOT NULL UNIQUE,
     price REAL NOT NULL,
     cost REAL NOT NULL,
@@ -27,8 +27,8 @@ CREATE TABLE Sales (
 
 CREATE TABLE SaleItems (
     id         INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-    sale_id    TEXT    NOT NULL REFERENCES Sales(id)    ON DELETE CASCADE,
-    product_id TEXT    NOT NULL REFERENCES Products(id) ON DELETE RESTRICT,
+    sale_id    INTEGER    NOT NULL REFERENCES Sales(id)    ON DELETE CASCADE,
+    product_id INTEGER    NOT NULL REFERENCES Products(id) ON DELETE RESTRICT,
     quantity   INTEGER NOT NULL,
     unit_price REAL    NOT NULL,
     unit_cost  REAL    NOT NULL,
@@ -37,15 +37,12 @@ CREATE TABLE SaleItems (
 
 -- PRODUCT QUERIES
 
-insertProduct:
-INSERT OR IGNORE INTO Products(
-    id, name, price, cost, emoji, qr_string, is_active, created_at, updated_at
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+CREATE UNIQUE INDEX idx_products_active_name
+ON Products(LOWER(name)) WHERE is_active = 1;
 
-insertOrIgnoreStock:
-INSERT OR IGNORE INTO Stocks(
-    product_id, current_qty, initial_qty, low_stock_threshold, updated_at
-) VALUES (?, ?, ?, ?, ?);
+insertProduct:
+INSERT INTO Products(id, name, price, cost, emoji, qr_string, is_active, created_at, updated_at)
+VALUES (:id, :name, :price, :cost, :emoji, :qr_string, :is_active, :created_at, :updated_at);
 
 updateProduct:
 UPDATE Products
@@ -58,21 +55,27 @@ SET name       = :name,
     updated_at = :updatedAt
 WHERE id = :id;
 
+updateProductPriceAndQr:
+UPDATE Products
+SET price      = :price,
+    qr_string  = :qrString,
+    updated_at = :updatedAt
+WHERE id = :id;
+
 updateQrString:
 UPDATE Products
-SET qr_string = :qrString,
-    updated_at = :updateAt
+SET qr_string = :qrString, updated_at = :updatedAt   -- arreglé el typo "updateAt"
 WHERE id = :id;
 
 deleteProduct:
 DELETE FROM Products
 WHERE id = :id;
-
-softDeleteProduct:
-UPDATE Products
-SET is_active = 0,
-    updated_at = :updated_at
-WHERE id = :id;
+--
+-- softDeleteProduct:
+-- UPDATE Products
+-- SET is_active = 0,
+--     updated_at = :updated_at
+-- WHERE id = :id;
 
 selectAllProducts:
 SELECT * FROM Products;
@@ -93,6 +96,10 @@ SELECT last_insert_rowid();
 
 -- STOCK QUERIES
 
+insertOrIgnoreStock:
+INSERT OR IGNORE INTO Stocks(product_id, current_qty, initial_qty, low_stock_threshold, updated_at)
+VALUES (:product_id, :current_qty, :initial_qty, :low_stock_threshold, :updated_at);
+
 getAllActiveWithStock:
 SELECT
     p.id,
@@ -111,7 +118,6 @@ LEFT JOIN Stocks s ON s.product_id = p.id
 WHERE p.is_active = 1
 ORDER BY p.name ASC;
 
--- Para el badge "QR listo" en CatalogScreen
 getProductsWithQrStatus:
 SELECT
     p.id,
@@ -125,8 +131,6 @@ SELECT
 FROM Products p
 WHERE p.is_active = 1
 ORDER BY p.name ASC;
-
--- ── STOCK ─────────────────────────────────────
 
 observeAllStock:
 SELECT
@@ -165,13 +169,6 @@ SET current_qty = :currentQty,
     initial_qty = CASE WHEN :currentQty > initial_qty THEN :currentQty ELSE initial_qty END,
     updated_at  = :updatedAt
 WHERE product_id = :productId;
-
-updateProductPriceAndQr:
-UPDATE Products
-SET price      = :price,
-    qr_string  = :qrString,
-    updated_at = :updatedAt
-WHERE id = :id;
 
 getStockByProductId:
 SELECT * FROM Stocks WHERE product_id = :productId;

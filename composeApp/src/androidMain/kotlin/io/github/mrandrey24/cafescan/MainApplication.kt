@@ -4,10 +4,13 @@ import android.app.Application
 import io.github.mrandrey24.cafescan.di.initKoin
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
+import qrgenerator.AppContext
 
 class MainApplication : Application() {
   override fun onCreate() {
     super.onCreate()
+
+    AppContext.apply { set(applicationContext) }
 
     initKoin {
       androidContext(this@MainApplication)
