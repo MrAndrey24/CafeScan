@@ -82,7 +82,7 @@ fun DashboardScreen(
               }
             },
             colors =
-                TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent),
+                TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
         )
       },
       bottomBar = {
@@ -118,8 +118,8 @@ fun DashboardScreen(
           NavigationBarItem(
               selected = false,
               onClick = onNavigateToCatalog,
-              icon = { Icon(Icons.Default.LocalOffer, contentDescription = "Catálogo") },
-              label = { Text("Catálogo") },
+              icon = { Icon(Icons.Default.LocalOffer, contentDescription = "Catalog") },
+              label = { Text("Catalog") },
           )
         }
       },

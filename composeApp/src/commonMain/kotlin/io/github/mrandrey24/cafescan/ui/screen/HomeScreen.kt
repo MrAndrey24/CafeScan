@@ -20,6 +20,7 @@ import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Inventory
 import androidx.compose.material.icons.filled.LocalOffer
 import androidx.compose.material.icons.filled.QrCodeScanner
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -75,7 +76,7 @@ fun HomeScreen(
   Scaffold(
       snackbarHost = { SnackbarHost(snackBarHostState) },
       topBar = {
-        TopAppBar(
+        CenterAlignedTopAppBar(
             title = {
               Text(
                   "CaféScan",
@@ -149,8 +150,8 @@ fun HomeScreen(
           NavigationBarItem(
               selected = false,
               onClick = onNavigateToCatalog,
-              icon = { Icon(Icons.Default.LocalOffer, contentDescription = "Catálogo") },
-              label = { Text("Catálogo") },
+              icon = { Icon(Icons.Default.LocalOffer, contentDescription = "Catalog") },
+              label = { Text("Catalog") },
           )
         }
       },
@@ -214,7 +215,7 @@ fun HomeScreen(
               modifier = Modifier.padding(bottom = 4.dp),
           )
           Text(
-              "$${uiState.totalAmount}",
+              "₡${uiState.totalAmount}",
               style = MaterialTheme.typography.headlineLarge,
               fontWeight = FontWeight.Bold,
               color = MaterialTheme.colorScheme.onSurface,

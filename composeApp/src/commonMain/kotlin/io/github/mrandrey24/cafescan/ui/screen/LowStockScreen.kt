@@ -126,8 +126,8 @@ fun LowStockScreen(
                 NavigationBarItem(
                     selected = false,
                     onClick = onNavigateToCatalog,
-                    icon = { Icon(Icons.Default.LocalOffer, contentDescription = "Catálogo") },
-                    label = { Text("Catálogo") },
+                    icon = { Icon(Icons.Default.LocalOffer, contentDescription = "Catalog") },
+                    label = { Text("Catalog") },
                 )
             }
         },

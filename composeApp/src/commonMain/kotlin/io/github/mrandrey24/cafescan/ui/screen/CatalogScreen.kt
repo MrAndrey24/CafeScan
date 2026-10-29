@@ -28,8 +28,10 @@ import androidx.compose.material.icons.filled.LocalOffer
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -79,25 +81,17 @@ fun CatalogScreen(
 
   Scaffold(
       topBar = {
-        TopAppBar(
+        CenterAlignedTopAppBar(
             title = {
-              Column(
-                  horizontalAlignment = Alignment.CenterHorizontally,
-                  modifier = Modifier.fillMaxWidth(),
-              ) {
-                Text(
-                    "New product",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
-              }
+              Text(
+                  "New Product",
+                  style = MaterialTheme.typography.titleLarge,
+                  fontWeight = FontWeight.Bold,
+                  color = MaterialTheme.colorScheme.onSurface,
+              )
             },
             navigationIcon = {
-              Row(
-                  verticalAlignment = Alignment.CenterVertically,
-                  modifier = Modifier.clickable { onBack() }.padding(8.dp),
-              ) {
+              IconButton(onClick = onBack) {
                 Icon(
                     Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Back",
@@ -106,11 +100,13 @@ fun CatalogScreen(
               }
             },
             actions = {
-              TextButton(onClick = { viewModel.saveProduct() },
-                  enabled = uiState.isFormValid) {
+              TextButton(
+                  onClick = { viewModel.saveProduct() },
+                  enabled = uiState.isFormValid
+              ) {
                 Text(
                     "Save",
-                    color = if (uiState.isFormValid) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onPrimary,
+                    color = if (uiState.isFormValid) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
                     fontWeight = FontWeight.Bold,
                 )
               }
