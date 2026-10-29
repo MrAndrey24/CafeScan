@@ -1,3 +1,11 @@
+/**
+ * Copyright (c) 2026 Andrey Acosta Ramirez
+ * All Rights Reserved.
+ *
+ * This software is confidential and proprietary. Unauthorized copying,
+ * distribution, or modification of this file is strictly prohibited.
+ *
+ */
 package io.github.mrandrey24.cafescan.ui.screen
 
 import androidx.compose.foundation.background
@@ -33,7 +41,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -56,22 +63,22 @@ fun HomeScreen(
     onNavigateToDashboard: () -> Unit,
     onNavigateToInventory: () -> Unit,
     onNavigateToCatalog: () -> Unit,
-//    onNavigateToScanner: () -> Unit,
-    viewModel: ScannerViewModel
+    //    onNavigateToScanner: () -> Unit,
+    viewModel: ScannerViewModel,
 ) {
-    val uiState by viewModel.uiState.collectAsState()
-    val snackBarHostState = remember { SnackbarHostState() }
+  val uiState by viewModel.uiState.collectAsState()
+  val snackBarHostState = remember { SnackbarHostState() }
 
-    LaunchedEffect(uiState.scanError) {
-        when (uiState.scanError) {
-            is ScanError.InvalidFormat   ->
-                snackBarHostState.showSnackbar("QR inválido — no es un producto de CaféScan")
-            is ScanError.ProductNotFound ->
-                snackBarHostState.showSnackbar("Producto no encontrado en el catálogo")
-            null -> Unit
-        }
-        viewModel.clearScanError()
+  LaunchedEffect(uiState.scanError) {
+    when (uiState.scanError) {
+      is ScanError.InvalidFormat ->
+          snackBarHostState.showSnackbar("QR inválido — no es un producto de CaféScan")
+      is ScanError.ProductNotFound ->
+          snackBarHostState.showSnackbar("Producto no encontrado en el catálogo")
+      null -> Unit
     }
+    viewModel.clearScanError()
+  }
 
   Scaffold(
       snackbarHost = { SnackbarHost(snackBarHostState) },
@@ -166,7 +173,8 @@ fun HomeScreen(
       item {
         QrPreviewCard(
             onScan = { rawString -> viewModel.onQrScanned(rawString) },
-            modifier = Modifier.padding(top = 8.dp))
+            modifier = Modifier.padding(top = 8.dp),
+        )
       }
 
       // Basket Header
@@ -189,10 +197,7 @@ fun HomeScreen(
       }
 
       // Basket Items
-      items(
-          uiState.basket,
-          key = { it.product.id }
-      ) { item ->
+      items(uiState.basket, key = { it.product.id }) { item ->
         OrderItemRow(
             item = item,
             onIncrease = { viewModel.onIncreaseQty(item.product.id.toString()) },

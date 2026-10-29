@@ -1,3 +1,11 @@
+/**
+ * Copyright (c) 2026 Andrey Acosta Ramirez
+ * All Rights Reserved.
+ *
+ * This software is confidential and proprietary. Unauthorized copying,
+ * distribution, or modification of this file is strictly prohibited.
+ *
+ */
 package io.github.mrandrey24.cafescan.ui.components
 
 import androidx.compose.foundation.layout.Box
@@ -20,7 +28,7 @@ import qrscanner.QrScanner
 
 @Composable
 fun QrPreviewCard(onScan: (String) -> Unit, modifier: Modifier = Modifier) {
-    var openImagePicker by remember { mutableStateOf(false) }
+  var openImagePicker by remember { mutableStateOf(false) }
 
   Card(
       modifier = modifier.fillMaxWidth().height(320.dp),
@@ -28,21 +36,17 @@ fun QrPreviewCard(onScan: (String) -> Unit, modifier: Modifier = Modifier) {
       elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
   ) {
     Box(modifier = Modifier.fillMaxSize()) {
-        QrScanner(
-            modifier = Modifier.fillMaxSize(),
-            flashlightOn = false,
-            cameraLens = CameraLens.Back,
-            openImagePicker = openImagePicker,
-            onCompletion = { rawString ->
-                onScan(rawString)
-            },
-            imagePickerHandler = { isOpen ->
-                openImagePicker = isOpen
-            },
-            onFailure = {},
-            overlayShape = OverlayShape.Square,
-            customOverlay = {}
-        )
+      QrScanner(
+          modifier = Modifier.fillMaxSize(),
+          flashlightOn = false,
+          cameraLens = CameraLens.Back,
+          openImagePicker = openImagePicker,
+          onCompletion = { rawString -> onScan(rawString) },
+          imagePickerHandler = { isOpen -> openImagePicker = isOpen },
+          onFailure = {},
+          overlayShape = OverlayShape.Square,
+          customOverlay = {},
+      )
     }
   }
 }

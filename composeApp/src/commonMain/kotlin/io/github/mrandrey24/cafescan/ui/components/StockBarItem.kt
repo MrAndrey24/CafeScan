@@ -1,3 +1,11 @@
+/**
+ * Copyright (c) 2026 Andrey Acosta Ramirez
+ * All Rights Reserved.
+ *
+ * This software is confidential and proprietary. Unauthorized copying,
+ * distribution, or modification of this file is strictly prohibited.
+ *
+ */
 package io.github.mrandrey24.cafescan.ui.components
 
 import androidx.compose.foundation.background
@@ -44,9 +52,9 @@ fun StockBarItem(
     onEditClick: (() -> Unit)? = null,
 ) {
   Card(
-      modifier = Modifier
-          .fillMaxWidth()
-          .then(if (onEditClick != null) Modifier.clickable { onEditClick() } else Modifier),
+      modifier =
+          Modifier.fillMaxWidth()
+              .then(if (onEditClick != null) Modifier.clickable { onEditClick() } else Modifier),
       shape = RoundedCornerShape(16.dp),
       colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
       elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
@@ -108,15 +116,12 @@ fun StockBarItem(
             }
           }
           if (onEditClick != null) {
-            IconButton(
-                onClick = onEditClick,
-                modifier = Modifier.size(32.dp)
-            ) {
+            IconButton(onClick = onEditClick, modifier = Modifier.size(32.dp)) {
               Icon(
                   imageVector = Icons.Default.Edit,
                   contentDescription = "Edit Stock and Price",
                   tint = MaterialTheme.colorScheme.primary,
-                  modifier = Modifier.size(18.dp)
+                  modifier = Modifier.size(18.dp),
               )
             }
           }

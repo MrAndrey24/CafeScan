@@ -1,3 +1,11 @@
+/**
+ * Copyright (c) 2026 Andrey Acosta Ramirez
+ * All Rights Reserved.
+ *
+ * This software is confidential and proprietary. Unauthorized copying,
+ * distribution, or modification of this file is strictly prohibited.
+ *
+ */
 package io.github.mrandrey24.cafescan.ui.navigation
 
 import androidx.compose.runtime.Composable
@@ -31,11 +39,11 @@ import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun AppNavigation() {
-    val navController = rememberNavController()
-    val productViewModel = koinViewModel<ProductViewModel>()
-    val qrViewModel = koinViewModel<QrViewModel>()
-    val scannerViewModel = koinViewModel<ScannerViewModel>()
-    val inventoryViewModel = koinViewModel<InventoryViewModel>()
+  val navController = rememberNavController()
+  val productViewModel = koinViewModel<ProductViewModel>()
+  val qrViewModel = koinViewModel<QrViewModel>()
+  val scannerViewModel = koinViewModel<ScannerViewModel>()
+  val inventoryViewModel = koinViewModel<InventoryViewModel>()
 
   NavHost(navController = navController, startDestination = HomeRoute) {
     composable<HomeRoute> {
@@ -61,7 +69,7 @@ fun AppNavigation() {
           onNavigateToDashboard = { navController.navigate(DashboardRoute) },
           onNavigateToInventory = { navController.navigate(InventoryRoute) },
           onNavigateToQrPreview = { navController.navigate(QrPreviewRoute(productId = it)) },
-          viewModel = productViewModel
+          viewModel = productViewModel,
       )
     }
     composable<InventoryRoute> {
@@ -71,7 +79,7 @@ fun AppNavigation() {
           onNavigateToDashboard = { navController.navigate(DashboardRoute) },
           onNavigateToCatalog = { navController.navigate(CatalogRoute) },
           onNavigateToLowStock = { navController.navigate(LowStockRoute) },
-          viewModel = inventoryViewModel
+          viewModel = inventoryViewModel,
       )
     }
     composable<LowStockRoute> {
@@ -80,7 +88,7 @@ fun AppNavigation() {
           onNavigateToScanner = { navController.navigate(HomeRoute) },
           onNavigateToDashboard = { navController.navigate(DashboardRoute) },
           onNavigateToCatalog = { navController.navigate(CatalogRoute) },
-          viewModel = inventoryViewModel
+          viewModel = inventoryViewModel,
       )
     }
     composable<QrPreviewRoute> { backStackEntry ->
@@ -91,7 +99,7 @@ fun AppNavigation() {
           onNavigateToScanner = { navController.navigate(HomeRoute) },
           onNavigateToDashboard = { navController.navigate(DashboardRoute) },
           onNavigateToInventory = { navController.navigate(InventoryRoute) },
-          viewModel = qrViewModel
+          viewModel = qrViewModel,
       )
     }
     composable<ProductFormRoute> { ProductFormScreen(onBack = { navController.popBackStack() }) }
