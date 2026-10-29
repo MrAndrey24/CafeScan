@@ -12,10 +12,15 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Print
 import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -34,6 +39,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -41,6 +47,7 @@ import androidx.compose.ui.unit.sp
 import io.github.mrandrey24.cafescan.domain.entities.QrPayload
 import io.github.mrandrey24.cafescan.domain.entities.StockItem
 import qrgenerator.QRCodeImage
+import qrgenerator.shareQrCodeImage
 
 @Composable
 fun UpdateStockDialog(
@@ -53,6 +60,7 @@ fun UpdateStockDialog(
     var priceText by remember { mutableStateOf(item.product.price.toString()) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var showDeleteConfirmation by remember { mutableStateOf(false) }
+    var qrBitmap by remember { mutableStateOf<ImageBitmap?>(null) }
 
     val currentStock = stockText.toIntOrNull() ?: 0
 
@@ -192,8 +200,50 @@ fun UpdateStockDialog(
                             QRCodeImage(
                                 modifier = Modifier.size(130.dp),
                                 url = qrData,
-                                contentDescription = "QR Code for ${item.product.name}"
+                                contentDescription = "QR Code for ${item.product.name}",
+                                onSuccess = { bitmap ->
+                                    qrBitmap = bitmap
+                                }
                             )
+                        }
+                    }
+
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        OutlinedButton(
+                            onClick = {
+                                qrBitmap?.let { shareQrCodeImage(it, item.product.name) }
+                            },
+                            enabled = qrBitmap != null,
+                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier.weight(1f).height(40.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Share,
+                                contentDescription = "Share QR",
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text("Share", fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                        }
+
+                        OutlinedButton(
+                            onClick = {
+                                qrBitmap?.let { shareQrCodeImage(it, item.product.name) }
+                            },
+                            enabled = qrBitmap != null,
+                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier.weight(1f).height(40.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Print,
+                                contentDescription = "Print QR",
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text("Print", fontSize = 13.sp, fontWeight = FontWeight.Bold)
                         }
                     }
                 }

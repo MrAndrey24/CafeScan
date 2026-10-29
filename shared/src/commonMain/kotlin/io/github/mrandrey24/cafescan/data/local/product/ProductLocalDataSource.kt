@@ -76,8 +76,7 @@ class ProductLocalDataSource(database: AppDatabase) : IProductLocalDataSource {
     }
 
     override suspend fun deleteProduct(id: Long) {
-        val now = Clock.System.now().toEpochMilliseconds()
-        dbQuery.softDeleteProduct(updated_at = now, id = id)
+        dbQuery.deleteProduct(id = id)
     }
 
     private fun mapProductSelecting(
