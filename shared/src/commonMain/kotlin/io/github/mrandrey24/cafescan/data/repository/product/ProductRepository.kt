@@ -22,4 +22,8 @@ class ProductRepository(private val localProductDataSource: IProductLocalDataSou
         return localProductDataSource.getProductByName(name)
     }
 
+    override suspend fun deleteProduct(id: Long) {
+        localProductDataSource.deleteProduct(id)
+    }
+
 }

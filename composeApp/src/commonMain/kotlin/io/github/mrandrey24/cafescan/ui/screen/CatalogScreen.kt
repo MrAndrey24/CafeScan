@@ -61,6 +61,7 @@ fun CatalogScreen(
     onNavigateToScanner: () -> Unit,
     onNavigateToDashboard: () -> Unit,
     onNavigateToInventory: () -> Unit,
+    onNavigateToQrPreview: (Long) -> Unit,
     viewModel: ProductViewModel,
 ) {
 
@@ -69,8 +70,10 @@ fun CatalogScreen(
 
     LaunchedEffect(uiState.isSaved, uiState.savedProductId) {
         if (uiState.isSaved && uiState.savedProductId != null) {
+            val id = uiState.savedProductId!!
             viewModel.clearSaveState()
-            onNavigateToInventory()
+            onNavigateToQrPreview(id)
+
         }
     }
 
@@ -288,10 +291,10 @@ fun CatalogScreen(
         )
       }
 
-      // Initial Stock
+      // Stock
       Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
-            "Initial stock",
+            "Stock",
             style = MaterialTheme.typography.labelLarge,
             color = MaterialTheme.colorScheme.outline,
         )

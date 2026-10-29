@@ -7,4 +7,5 @@ interface IProductRepository {
     suspend fun retrieveAllProducts(): List<Product>
     suspend fun retrieveProductById(id: Long): Product?
     suspend fun isNameExists(name: String): Boolean
+    suspend fun deleteProduct(id: Long)
 }

@@ -44,8 +44,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import io.github.mrandrey24.cafescan.domain.entities.OrderItem
-import io.github.mrandrey24.cafescan.domain.entities.Product
 import io.github.mrandrey24.cafescan.presentation.ScannerViewModel
 import io.github.mrandrey24.cafescan.presentation.state.ScanError
 import io.github.mrandrey24.cafescan.ui.components.OrderItemRow
@@ -61,21 +59,21 @@ fun HomeScreen(
     viewModel: ScannerViewModel
 ) {
     val uiState by viewModel.uiState.collectAsState()
-    val snackbarHostState = remember { SnackbarHostState() }
+    val snackBarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(uiState.scanError) {
         when (uiState.scanError) {
             is ScanError.InvalidFormat   ->
-                snackbarHostState.showSnackbar("QR inválido — no es un producto de CaféScan")
+                snackBarHostState.showSnackbar("QR inválido — no es un producto de CaféScan")
             is ScanError.ProductNotFound ->
-                snackbarHostState.showSnackbar("Producto no encontrado en el catálogo")
+                snackBarHostState.showSnackbar("Producto no encontrado en el catálogo")
             null -> Unit
         }
         viewModel.clearScanError()
     }
 
   Scaffold(
-      snackbarHost = { SnackbarHost(snackbarHostState) },
+      snackbarHost = { SnackbarHost(snackBarHostState) },
       topBar = {
         TopAppBar(
             title = {

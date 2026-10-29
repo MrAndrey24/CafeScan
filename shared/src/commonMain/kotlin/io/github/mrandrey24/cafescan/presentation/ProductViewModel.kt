@@ -49,7 +49,6 @@ class ProductViewModel(
         if (name.isBlank()) return
 
         nameCheckJob = viewModelScope.launch {
-            delay(400)
             val exists = checkProductNameExistsUseCase(name.trim())
             _uiState.update { it.copy(isProductNameExists = exists) }
         }

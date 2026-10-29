@@ -40,15 +40,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.github.mrandrey24.cafescan.domain.entities.StockItem
 import io.github.mrandrey24.cafescan.domain.entities.StockStatus
 import io.github.mrandrey24.cafescan.presentation.InventoryViewModel
 import io.github.mrandrey24.cafescan.ui.components.StockBarItem
+import io.github.mrandrey24.cafescan.ui.components.UpdateStockDialog
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,9 +62,11 @@ fun InventoryScreen(
     onNavigateToScanner: () -> Unit,
     onNavigateToDashboard: () -> Unit,
     onNavigateToCatalog: () -> Unit,
+    onNavigateToLowStock: () -> Unit = {},
     viewModel: InventoryViewModel,
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    var selectedItemForEdit by remember { mutableStateOf<StockItem?>(null) }
 
     LaunchedEffect(Unit) {
         viewModel.loadInventory()
@@ -95,7 +102,7 @@ fun InventoryScreen(
               }
             },
             colors =
-                TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent),
+                TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
         )
       },
       bottomBar = {
@@ -175,7 +182,7 @@ fun InventoryScreen(
       if (lowStockCount > 0) {
           item {
               Surface(
-                  modifier = Modifier.fillMaxWidth().clickable { /* Adjust stock */ },
+                  modifier = Modifier.fillMaxWidth().clickable { onNavigateToLowStock() },
                   shape = MaterialTheme.shapes.large,
                   color = MaterialTheme.colorScheme.error,
               ) {
@@ -202,7 +209,7 @@ fun InventoryScreen(
                       }
 
                       Text(
-                          text = "$lowStockCount products with low stock - tap to adjust",
+                          text = "$lowStockCount products with low stock - tap to view",
                           style = MaterialTheme.typography.bodyMedium,
                           color = MaterialTheme.colorScheme.onPrimary,
                           modifier = Modifier.weight(1f),
@@ -235,7 +242,7 @@ fun InventoryScreen(
               }
           }
       } else {
-          items(uiState.items) { itemWithStock ->
+          items(uiState.items, key = { it.product.id }) { itemWithStock ->
               val product = itemWithStock.product
               val current = itemWithStock.currentQty
               val total = itemWithStock.initialQty.coerceAtLeast(current)
@@ -258,10 +265,28 @@ fun InventoryScreen(
                   badgeLabel = badgeLabel,
                   badgeColor = badgeColor,
                   emoji = product.emoji ?: "📦",
+                  onEditClick = {
+                      selectedItemForEdit = itemWithStock
+                  }
               )
           }
       }
     }
+  }
+
+  selectedItemForEdit?.let { itemToEdit ->
+      UpdateStockDialog(
+          item = itemToEdit,
+          onDismiss = { selectedItemForEdit = null },
+          onSave = { newStock, newPrice ->
+              viewModel.updateStockAndPrice(itemToEdit.product.id, newStock, newPrice)
+              selectedItemForEdit = null
+          },
+          onDelete = { productId ->
+              viewModel.deleteProduct(productId)
+              selectedItemForEdit = null
+          }
+      )
   }
 }
 

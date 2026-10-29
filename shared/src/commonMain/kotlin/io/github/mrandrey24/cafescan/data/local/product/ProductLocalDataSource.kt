@@ -75,6 +75,10 @@ class ProductLocalDataSource(database: AppDatabase) : IProductLocalDataSource {
         return dbQuery.findProductByName(name).executeAsOne()
     }
 
+    override suspend fun deleteProduct(id: Long) {
+        dbQuery.deleteProduct(id = id)
+    }
+
     private fun mapProductSelecting(
         id: Long,
         name: String,
