@@ -1,3 +1,11 @@
+/**
+ * Copyright (c) 2026 Andrey Acosta Ramirez
+ * All Rights Reserved.
+ *
+ * This software is confidential and proprietary. Unauthorized copying,
+ * distribution, or modification of this file is strictly prohibited.
+ *
+ */
 package io.github.mrandrey24.cafescan.ui.screen
 
 import androidx.compose.foundation.background
@@ -65,12 +73,10 @@ fun InventoryScreen(
     onNavigateToLowStock: () -> Unit = {},
     viewModel: InventoryViewModel,
 ) {
-    val uiState by viewModel.uiState.collectAsState()
-    var selectedItemForEdit by remember { mutableStateOf<StockItem?>(null) }
+  val uiState by viewModel.uiState.collectAsState()
+  var selectedItemForEdit by remember { mutableStateOf<StockItem?>(null) }
 
-    LaunchedEffect(Unit) {
-        viewModel.loadInventory()
-    }
+  LaunchedEffect(Unit) { viewModel.loadInventory() }
 
   Scaffold(
       topBar = {
@@ -101,8 +107,7 @@ fun InventoryScreen(
                 )
               }
             },
-            colors =
-                TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
+            colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
         )
       },
       bottomBar = {
@@ -145,15 +150,12 @@ fun InventoryScreen(
       },
       containerColor = MaterialTheme.colorScheme.background,
   ) { padding ->
-      if (uiState.isLoading) {
-          Box(
-              modifier = Modifier.fillMaxSize().padding(padding),
-              contentAlignment = Alignment.Center
-          ) {
-              CircularProgressIndicator()
-          }
-          return@Scaffold
+    if (uiState.isLoading) {
+      Box(modifier = Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
+        CircularProgressIndicator()
       }
+      return@Scaffold
+    }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp),
@@ -178,115 +180,121 @@ fun InventoryScreen(
       }
 
       // Low stock warning banner if any
-      val lowStockCount = uiState.items.count { it.status == StockStatus.LOW || it.status == StockStatus.CRITICAL || it.status == StockStatus.OUT_OF_STOCK }
-      if (lowStockCount > 0) {
-          item {
-              Surface(
-                  modifier = Modifier.fillMaxWidth().clickable { onNavigateToLowStock() },
-                  shape = MaterialTheme.shapes.large,
-                  color = MaterialTheme.colorScheme.error,
-              ) {
-                  Row(
-                      modifier = Modifier.padding(16.dp),
-                      verticalAlignment = Alignment.CenterVertically,
-                      horizontalArrangement = Arrangement.spacedBy(12.dp),
-                  ) {
-                      Box(
-                          modifier =
-                              Modifier.size(32.dp)
-                                  .background(
-                                      MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.2f),
-                                      CircleShape,
-                                  ),
-                          contentAlignment = Alignment.Center,
-                      ) {
-                          Icon(
-                              imageVector = Icons.Default.Info,
-                              contentDescription = null,
-                              tint = MaterialTheme.colorScheme.onPrimary,
-                              modifier = Modifier.size(20.dp),
-                          )
-                      }
-
-                      Text(
-                          text = "$lowStockCount products with low stock - tap to view",
-                          style = MaterialTheme.typography.bodyMedium,
-                          color = MaterialTheme.colorScheme.onPrimary,
-                          modifier = Modifier.weight(1f),
-                      )
-
-                      Icon(
-                          imageVector = Icons.Default.ChevronRight,
-                          contentDescription = null,
-                          tint = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f),
-                      )
-                  }
-              }
+      val lowStockCount =
+          uiState.items.count {
+            it.status == StockStatus.LOW ||
+                it.status == StockStatus.CRITICAL ||
+                it.status == StockStatus.OUT_OF_STOCK
           }
+      if (lowStockCount > 0) {
+        item {
+          Surface(
+              modifier = Modifier.fillMaxWidth().clickable { onNavigateToLowStock() },
+              shape = MaterialTheme.shapes.large,
+              color = MaterialTheme.colorScheme.error,
+          ) {
+            Row(
+                modifier = Modifier.padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+              Box(
+                  modifier =
+                      Modifier.size(32.dp)
+                          .background(
+                              MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.2f),
+                              CircleShape,
+                          ),
+                  contentAlignment = Alignment.Center,
+              ) {
+                Icon(
+                    imageVector = Icons.Default.Info,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onPrimary,
+                    modifier = Modifier.size(20.dp),
+                )
+              }
+
+              Text(
+                  text = "$lowStockCount products with low stock - tap to view",
+                  style = MaterialTheme.typography.bodyMedium,
+                  color = MaterialTheme.colorScheme.onPrimary,
+                  modifier = Modifier.weight(1f),
+              )
+
+              Icon(
+                  imageVector = Icons.Default.ChevronRight,
+                  contentDescription = null,
+                  tint = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f),
+              )
+            }
+          }
+        }
       }
 
       // Category: PRODUCTS
       item { CategoryHeader(title = "PRODUCTS", count = "${uiState.items.size} items") }
 
       if (uiState.items.isEmpty()) {
-          item {
-              Box(
-                  modifier = Modifier.fillMaxWidth().padding(32.dp),
-                  contentAlignment = Alignment.Center
-              ) {
-                  Text(
-                      "No products in inventory yet.\nCreate one in the Catalog screen!",
-                      style = MaterialTheme.typography.bodyMedium,
-                      color = MaterialTheme.colorScheme.outline,
-                  )
-              }
+        item {
+          Box(
+              modifier = Modifier.fillMaxWidth().padding(32.dp),
+              contentAlignment = Alignment.Center,
+          ) {
+            Text(
+                "No products in inventory yet.\nCreate one in the Catalog screen!",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.outline,
+            )
           }
+        }
       } else {
-          items(uiState.items, key = { it.product.id }) { itemWithStock ->
-              val product = itemWithStock.product
-              val current = itemWithStock.currentQty
-              val total = itemWithStock.initialQty.coerceAtLeast(current)
-              val status = itemWithStock.status
+        items(uiState.items, key = { it.product.id }) { itemWithStock ->
+          val product = itemWithStock.product
+          val current = itemWithStock.currentQty
+          val total = itemWithStock.initialQty.coerceAtLeast(current)
+          val status = itemWithStock.status
 
-              val (statusLabel, statusColor, badgeLabel, badgeColor) = when (status) {
-                  StockStatus.HEALTHY -> Quad("Healthy", Color(0xFF4CAF50), null, Color.Transparent)
-                  StockStatus.LOW -> Quad("Running Out", Color(0xFFD4A373), "LOW", Color(0xFFD4A373))
-                  StockStatus.CRITICAL -> Quad("Low Stock", Color(0xFFBA1A1A), "CRITICAL", Color(0xFFBA1A1A))
-                  StockStatus.OUT_OF_STOCK -> Quad("Out of Stock", Color(0xFFBA1A1A), "OUT", Color(0xFFBA1A1A))
+          val (statusLabel, statusColor, badgeLabel, badgeColor) =
+              when (status) {
+                StockStatus.HEALTHY -> Quad("Healthy", Color(0xFF4CAF50), null, Color.Transparent)
+                StockStatus.LOW -> Quad("Running Out", Color(0xFFD4A373), "LOW", Color(0xFFD4A373))
+                StockStatus.CRITICAL ->
+                    Quad("Low Stock", Color(0xFFBA1A1A), "CRITICAL", Color(0xFFBA1A1A))
+                StockStatus.OUT_OF_STOCK ->
+                    Quad("Out of Stock", Color(0xFFBA1A1A), "OUT", Color(0xFFBA1A1A))
               }
 
-              StockBarItem(
-                  name = product.name,
-                  subtitle = "₡${product.price}",
-                  current = current,
-                  total = if (total > 0) total else 10,
-                  statusLabel = statusLabel,
-                  statusColor = statusColor,
-                  badgeLabel = badgeLabel,
-                  badgeColor = badgeColor,
-                  emoji = product.emoji ?: "📦",
-                  onEditClick = {
-                      selectedItemForEdit = itemWithStock
-                  }
-              )
-          }
+          StockBarItem(
+              name = product.name,
+              subtitle = "₡${product.price}",
+              current = current,
+              total = if (total > 0) total else 10,
+              statusLabel = statusLabel,
+              statusColor = statusColor,
+              badgeLabel = badgeLabel,
+              badgeColor = badgeColor,
+              emoji = product.emoji ?: "📦",
+              onEditClick = { selectedItemForEdit = itemWithStock },
+          )
+        }
       }
     }
   }
 
   selectedItemForEdit?.let { itemToEdit ->
-      UpdateStockDialog(
-          item = itemToEdit,
-          onDismiss = { selectedItemForEdit = null },
-          onSave = { newStock, newPrice ->
-              viewModel.updateStockAndPrice(itemToEdit.product.id, newStock, newPrice)
-              selectedItemForEdit = null
-          },
-          onDelete = { productId ->
-              viewModel.deleteProduct(productId)
-              selectedItemForEdit = null
-          }
-      )
+    UpdateStockDialog(
+        item = itemToEdit,
+        onDismiss = { selectedItemForEdit = null },
+        onSave = { newStock, newPrice ->
+          viewModel.updateStockAndPrice(itemToEdit.product.id, newStock, newPrice)
+          selectedItemForEdit = null
+        },
+        onDelete = { productId ->
+          viewModel.deleteProduct(productId)
+          selectedItemForEdit = null
+        },
+    )
   }
 }
 

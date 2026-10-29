@@ -1,3 +1,11 @@
+/**
+ * Copyright (c) 2026 Andrey Acosta Ramirez
+ * All Rights Reserved.
+ *
+ * This software is confidential and proprietary. Unauthorized copying,
+ * distribution, or modification of this file is strictly prohibited.
+ *
+ */
 package io.github.mrandrey24.cafescan.presentation
 
 import androidx.compose.ui.graphics.ImageBitmap
@@ -11,28 +19,25 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class QrViewModel(
-    private val productRepository: IProductRepository
-) : ViewModel() {
-    private val _uiState = MutableStateFlow(QrPreviewUiState())
-    val uiState: StateFlow<QrPreviewUiState> = _uiState.asStateFlow()
+class QrViewModel(private val productRepository: IProductRepository) : ViewModel() {
+  private val _uiState = MutableStateFlow(QrPreviewUiState())
+  val uiState: StateFlow<QrPreviewUiState> = _uiState.asStateFlow()
 
-    fun loadProduct(productId: Long) {
-        viewModelScope.launch {
-            _uiState.update{ it.copy(isLoading = true) }
-            try {
-                val product = productRepository.retrieveProductById(productId)
-                _uiState.update { it.copy(product = product, isLoading = false) }
-            }catch (e: Exception) {
-                _uiState.update { it.copy(isLoading = false, errorMessage = e.message) }
-            }
-        }
+  fun loadProduct(productId: Long) {
+    viewModelScope.launch {
+      _uiState.update { it.copy(isLoading = true) }
+      try {
+        val product = productRepository.retrieveProductById(productId)
+        _uiState.update { it.copy(product = product, isLoading = false) }
+      } catch (e: Exception) {
+        _uiState.update { it.copy(isLoading = false, errorMessage = e.message) }
+      }
     }
+  }
 
-    fun onQrBitmapReady(bitmap: ImageBitmap) {
-        _uiState.update { it.copy(qrBitmap = bitmap) }
-    }
+  fun onQrBitmapReady(bitmap: ImageBitmap) {
+    _uiState.update { it.copy(qrBitmap = bitmap) }
+  }
 
-    fun clearError() = _uiState.update { it.copy(errorMessage = null) }
-
+  fun clearError() = _uiState.update { it.copy(errorMessage = null) }
 }

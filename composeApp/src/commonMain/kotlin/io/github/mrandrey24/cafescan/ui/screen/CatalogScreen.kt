@@ -1,3 +1,11 @@
+/**
+ * Copyright (c) 2026 Andrey Acosta Ramirez
+ * All Rights Reserved.
+ *
+ * This software is confidential and proprietary. Unauthorized copying,
+ * distribution, or modification of this file is strictly prohibited.
+ *
+ */
 package io.github.mrandrey24.cafescan.ui.screen
 
 import androidx.compose.foundation.background
@@ -41,7 +49,6 @@ import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -67,17 +74,16 @@ fun CatalogScreen(
     viewModel: ProductViewModel,
 ) {
 
-    val uiState by viewModel.uiState.collectAsState()
-    val emojis = listOf("☕", "🥐", "🍫", "🥤", "🧁", "🍵", "🥗")
+  val uiState by viewModel.uiState.collectAsState()
+  val emojis = listOf("☕", "🥐", "🍫", "🥤", "🧁", "🍵", "🥗")
 
-    LaunchedEffect(uiState.isSaved, uiState.savedProductId) {
-        if (uiState.isSaved && uiState.savedProductId != null) {
-            val id = uiState.savedProductId!!
-            viewModel.clearSaveState()
-            onNavigateToQrPreview(id)
-
-        }
+  LaunchedEffect(uiState.isSaved, uiState.savedProductId) {
+    if (uiState.isSaved && uiState.savedProductId != null) {
+      val id = uiState.savedProductId!!
+      viewModel.clearSaveState()
+      onNavigateToQrPreview(id)
     }
+  }
 
   Scaffold(
       topBar = {
@@ -100,13 +106,12 @@ fun CatalogScreen(
               }
             },
             actions = {
-              TextButton(
-                  onClick = { viewModel.saveProduct() },
-                  enabled = uiState.isFormValid
-              ) {
+              TextButton(onClick = { viewModel.saveProduct() }, enabled = uiState.isFormValid) {
                 Text(
                     "Save",
-                    color = if (uiState.isFormValid) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline,
+                    color =
+                        if (uiState.isFormValid) MaterialTheme.colorScheme.primary
+                        else MaterialTheme.colorScheme.outline,
                     fontWeight = FontWeight.Bold,
                 )
               }
@@ -173,7 +178,7 @@ fun CatalogScreen(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             contentPadding = PaddingValues(vertical = 4.dp),
         ) {
-            items(emojis) { itemEmoji ->
+          items(emojis) { itemEmoji ->
             val isSelected = uiState.emoji == itemEmoji
             Box(
                 modifier =
@@ -208,7 +213,7 @@ fun CatalogScreen(
         )
         OutlinedTextField(
             value = uiState.name,
-            onValueChange = {  viewModel.onNameChanged(it) },
+            onValueChange = { viewModel.onNameChanged(it) },
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
             isError = uiState.isProductNameExists,
@@ -217,17 +222,17 @@ fun CatalogScreen(
                     focusedContainerColor = MaterialTheme.colorScheme.surface,
                     unfocusedContainerColor = MaterialTheme.colorScheme.surface,
                     focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    errorBorderColor = MaterialTheme.colorScheme.error
+                    errorBorderColor = MaterialTheme.colorScheme.error,
                 ),
         )
 
-          if (uiState.isProductNameExists) {
-              Text(
-                  "Product name already exists",
-                  color = MaterialTheme.colorScheme.error,
-                  style = MaterialTheme.typography.labelSmall
-              )
-          }
+        if (uiState.isProductNameExists) {
+          Text(
+              "Product name already exists",
+              color = MaterialTheme.colorScheme.error,
+              style = MaterialTheme.typography.labelSmall,
+          )
+        }
       }
 
       // Price & Cost Row
@@ -240,7 +245,7 @@ fun CatalogScreen(
           )
           OutlinedTextField(
               value = uiState.price,
-              onValueChange = { viewModel.onPriceChange(it)},
+              onValueChange = { viewModel.onPriceChange(it) },
               prefix = { Text("₡ ") },
               shape = RoundedCornerShape(12.dp),
               keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
@@ -312,9 +317,7 @@ fun CatalogScreen(
 
       // Submit Button
       Button(
-          onClick = {
-            viewModel.saveProduct()
-          },
+          onClick = { viewModel.saveProduct() },
           modifier = Modifier.fillMaxWidth().height(56.dp),
           shape = MaterialTheme.shapes.large,
           enabled = uiState.isFormValid,

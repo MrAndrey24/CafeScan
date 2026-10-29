@@ -1,3 +1,11 @@
+/**
+ * Copyright (c) 2026 Andrey Acosta Ramirez
+ * All Rights Reserved.
+ *
+ * This software is confidential and proprietary. Unauthorized copying,
+ * distribution, or modification of this file is strictly prohibited.
+ *
+ */
 package io.github.mrandrey24.cafescan.di.modules
 
 import io.github.mrandrey24.cafescan.presentation.InventoryViewModel
@@ -8,8 +16,8 @@ import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 val presentationModule = module {
-    viewModel { ProductViewModel(get(), get()) }
-    viewModel { QrViewModel(get()) }
-    viewModel { ScannerViewModel(get()) }
-    viewModel { InventoryViewModel(get(), get(), get()) }
+  viewModel { ProductViewModel(get(), get()) }
+  viewModel { QrViewModel(get()) }
+  viewModel { ScannerViewModel(get()) }
+  viewModel { InventoryViewModel(get(), get(), get()) }
 }

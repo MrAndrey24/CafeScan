@@ -1,13 +1,21 @@
+/**
+ * Copyright (c) 2026 Andrey Acosta Ramirez
+ * All Rights Reserved.
+ *
+ * This software is confidential and proprietary. Unauthorized copying,
+ * distribution, or modification of this file is strictly prohibited.
+ *
+ */
 package io.github.mrandrey24.cafescan.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
 // CafeScan Artisan Palette
-val CafeEspresso = Color(0xFF3D2314)     // Rich Espresso Coffee
-val CafeAmber = Color(0xFFC68B59)        // Warm Golden Amber
-val CafeCream = Color(0xFFFAF7F2)        // Soft Warm Cream Background
-val CafeGreen = Color(0xFF2E7D32)        // Forest Emerald Green
-val CafeRed = Color(0xFFC62828)          // Crimson Alert
+val CafeEspresso = Color(0xFF3D2314) // Rich Espresso Coffee
+val CafeAmber = Color(0xFFC68B59) // Warm Golden Amber
+val CafeCream = Color(0xFFFAF7F2) // Soft Warm Cream Background
+val CafeGreen = Color(0xFF2E7D32) // Forest Emerald Green
+val CafeRed = Color(0xFFC62828) // Crimson Alert
 
 // Light Mode Scheme
 val md_theme_light_primary = CafeEspresso
