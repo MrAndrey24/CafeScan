@@ -276,7 +276,10 @@ fun QrPreviewScreen(
                 modifier            = Modifier.padding(top = 8.dp),
             ) {
                 Button(
-                    onClick  = { /* Print — Sprint 5 */ },
+                    onClick  = {
+                        uiState.qrBitmap?.let { shareQrCodeImage(it, product.name) }
+                    },
+                    enabled  = uiState.qrBitmap != null,
                     modifier = Modifier.fillMaxWidth().height(56.dp),
                     shape    = MaterialTheme.shapes.large,
                     colors   = ButtonDefaults.buttonColors(
