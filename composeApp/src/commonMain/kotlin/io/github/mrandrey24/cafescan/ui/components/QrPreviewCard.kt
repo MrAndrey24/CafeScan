@@ -22,6 +22,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import kotlin.time.Clock
 import qrscanner.CameraLens
 import qrscanner.OverlayShape
 import qrscanner.QrScanner
@@ -29,6 +30,8 @@ import qrscanner.QrScanner
 @Composable
 fun QrPreviewCard(onScan: (String) -> Unit, modifier: Modifier = Modifier) {
   var openImagePicker by remember { mutableStateOf(false) }
+  var lastScannedString by remember { mutableStateOf<String?>(null) }
+  var lastScannedTime by remember { mutableStateOf(0L) }
 
   Card(
       modifier = modifier.fillMaxWidth().height(320.dp),
@@ -41,7 +44,15 @@ fun QrPreviewCard(onScan: (String) -> Unit, modifier: Modifier = Modifier) {
           flashlightOn = false,
           cameraLens = CameraLens.Back,
           openImagePicker = openImagePicker,
-          onCompletion = { rawString -> onScan(rawString) },
+          onCompletion = { rawString ->
+            val now = Clock.System.now().toEpochMilliseconds()
+            if (rawString == lastScannedString && (now - lastScannedTime) < 1500L) {
+              return@QrScanner
+            }
+            lastScannedString = rawString
+            lastScannedTime = now
+            onScan(rawString)
+          },
           imagePickerHandler = { isOpen -> openImagePicker = isOpen },
           onFailure = {},
           overlayShape = OverlayShape.Square,

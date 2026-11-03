@@ -19,12 +19,23 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlin.time.Clock
 
 class ScannerViewModel(private val productRepository: IProductRepository) : ViewModel() {
   private val _uiState = MutableStateFlow(ScannerUiState())
   val uiState = _uiState.asStateFlow()
 
+  private var lastScannedString: String? = null
+  private var lastScannedTime: Long = 0L
+
   fun onQrScanned(rawString: String) {
+    val now = Clock.System.now().toEpochMilliseconds()
+    if (rawString == lastScannedString && (now - lastScannedTime) < 1500L) {
+      return
+    }
+    lastScannedString = rawString
+    lastScannedTime = now
+
     viewModelScope.launch {
       try {
         val payload = QrPayload.fromQrString(rawString)
@@ -81,6 +92,23 @@ class ScannerViewModel(private val productRepository: IProductRepository) : View
             }
           }
       state.copy(basket = updated)
+    }
+  }
+
+  fun checkout() {
+    viewModelScope.launch {
+      try {
+        val currentBasket = _uiState.value.basket
+        if (currentBasket.isEmpty()) return@launch
+
+        currentBasket.forEach { item ->
+          productRepository.decrementStock(item.product.id, item.quantity.toLong())
+        }
+
+        clearBasket()
+      } catch (e: Exception) {
+        _uiState.update { it.copy(errorMessage = e.message) }
+      }
     }
   }
 
