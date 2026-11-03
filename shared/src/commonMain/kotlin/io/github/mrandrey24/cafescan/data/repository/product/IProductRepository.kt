@@ -20,4 +20,6 @@ interface IProductRepository {
   suspend fun isNameExists(name: String): Boolean
 
   suspend fun deleteProduct(id: Long)
+
+  suspend fun decrementStock(productId: Long, qty: Long)
 }
