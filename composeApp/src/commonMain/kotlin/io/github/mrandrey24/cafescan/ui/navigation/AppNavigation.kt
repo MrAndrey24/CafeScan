@@ -60,6 +60,7 @@ fun AppNavigation() {
           onNavigateToScanner = { navController.navigate(HomeRoute) },
           onNavigateToInventory = { navController.navigate(InventoryRoute) },
           onNavigateToCatalog = { navController.navigate(CatalogRoute) },
+          viewModel = scannerViewModel,
       )
     }
     composable<CatalogRoute> {

@@ -13,6 +13,7 @@ import androidx.lifecycle.viewModelScope
 import io.github.mrandrey24.cafescan.data.repository.product.IProductRepository
 import io.github.mrandrey24.cafescan.domain.entities.OrderItem
 import io.github.mrandrey24.cafescan.domain.entities.QrPayload
+import io.github.mrandrey24.cafescan.presentation.state.LastSale
 import io.github.mrandrey24.cafescan.presentation.state.ScanError
 import io.github.mrandrey24.cafescan.presentation.state.ScannerUiState
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -101,15 +102,50 @@ class ScannerViewModel(private val productRepository: IProductRepository) : View
         val currentBasket = _uiState.value.basket
         if (currentBasket.isEmpty()) return@launch
 
+        val totalCharged = currentBasket.sumOf { it.subtotal }
+        val estProfit = currentBasket.sumOf { (it.product.price - it.product.cost) * it.quantity }
+
         currentBasket.forEach { item ->
           productRepository.decrementStock(item.product.id, item.quantity.toLong())
         }
 
-        clearBasket()
+        val nowMs = Clock.System.now().toEpochMilliseconds()
+        val timeString = formatTime(nowMs)
+
+        val completedSale = LastSale(
+            items = currentBasket,
+            totalCharged = totalCharged,
+            estProfit = estProfit,
+            timestamp = timeString,
+        )
+
+        _uiState.update { state ->
+          state.copy(
+              basket = emptyList(),
+              lastSale = completedSale,
+              scanError = null,
+          )
+        }
       } catch (e: Exception) {
         _uiState.update { it.copy(errorMessage = e.message) }
       }
     }
+  }
+
+  private fun formatTime(epochMs: Long): String {
+    val totalSeconds = epochMs / 1000
+    val totalMinutes = totalSeconds / 60
+    val totalHours = totalMinutes / 60
+    val currentMinute = (totalMinutes % 60).toInt()
+    val currentHour24 = (totalHours % 24).toInt()
+    val isPm = currentHour24 >= 12
+    val hour12 = when (val h = currentHour24 % 12) {
+      0 -> 12
+      else -> h
+    }
+    val minStr = if (currentMinute < 10) "0$currentMinute" else "$currentMinute"
+    val amPm = if (isPm) "PM" else "AM"
+    return "$hour12:$minStr $amPm"
   }
 
   fun clearBasket() {

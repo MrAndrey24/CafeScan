@@ -44,13 +44,16 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import io.github.mrandrey24.cafescan.model.SaleItem
+import io.github.mrandrey24.cafescan.domain.entities.OrderItem
+import io.github.mrandrey24.cafescan.presentation.ScannerViewModel
 import io.github.mrandrey24.cafescan.ui.components.MetricCard
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -60,14 +63,10 @@ fun DashboardScreen(
     onNavigateToScanner: () -> Unit,
     onNavigateToInventory: () -> Unit,
     onNavigateToCatalog: () -> Unit,
+    viewModel: ScannerViewModel,
 ) {
-  // Hardcoded data for the Dashboard PNG
-  val hardcodedSaleItems =
-      listOf(
-          SaleItem(name = "Latte", emoji = "☕", qty = 2, unitPrice = 4.50),
-          SaleItem(name = "Croissant", emoji = "🥐", qty = 1, unitPrice = 3.50),
-          SaleItem(name = "Avocado Toast", emoji = "🥑", qty = 1, unitPrice = 12.00),
-      )
+  val uiState by viewModel.uiState.collectAsState()
+  val lastSale = uiState.lastSale
 
   Scaffold(
       topBar = {
@@ -159,10 +158,14 @@ fun DashboardScreen(
       item {
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
           Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            MetricCard(label = "Total Charged", value = "$24.50", modifier = Modifier.weight(1f))
+            MetricCard(
+                label = "Total Charged",
+                value = if (lastSale != null) "₡${lastSale.totalCharged}" else "₡0.0",
+                modifier = Modifier.weight(1f)
+            )
             MetricCard(
                 label = "Est. Profit",
-                value = "+$12.30",
+                value = if (lastSale != null) "+₡${lastSale.estProfit}" else "₡0.0",
                 valueColor = MaterialTheme.colorScheme.tertiary,
                 modifier = Modifier.weight(1f),
             )
@@ -170,11 +173,15 @@ fun DashboardScreen(
           Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             MetricCard(
                 label = "Items",
-                value = "4",
+                value = if (lastSale != null) "${lastSale.items.sumOf { it.quantity }}" else "0",
                 icon = Icons.Default.Inventory,
                 modifier = Modifier.weight(1f),
             )
-            MetricCard(label = "Daily Total", value = "$842.00", modifier = Modifier.weight(1f))
+            MetricCard(
+                label = "Daily Total",
+                value = if (lastSale != null) "₡${lastSale.totalCharged}" else "₡0.0",
+                modifier = Modifier.weight(1f)
+            )
           }
         }
       }
@@ -190,41 +197,58 @@ fun DashboardScreen(
       }
 
       // Detail List
-      items(hardcodedSaleItems) { item -> SaleDetailItemRow(item) }
+      if (lastSale != null && lastSale.items.isNotEmpty()) {
+        items(lastSale.items) { item -> OrderItemDetailRow(item) }
+      } else {
+        item {
+          Box(
+              modifier = Modifier.fillMaxWidth().padding(24.dp),
+              contentAlignment = Alignment.Center
+          ) {
+            Text(
+                text = "No purchase recorded yet. Scan products on the Scanner screen to make a purchase.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.outline
+            )
+          }
+        }
+      }
 
       // Status Banner
-      item {
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp),
-            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-        ) {
-          Row(
-              modifier = Modifier.padding(16.dp),
-              verticalAlignment = Alignment.CenterVertically,
-              horizontalArrangement = Arrangement.SpaceBetween,
+      if (lastSale != null) {
+        item {
+          Surface(
+              modifier = Modifier.fillMaxWidth(),
+              shape = RoundedCornerShape(12.dp),
+              color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
           ) {
             Row(
+                modifier = Modifier.padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-              Icon(
-                  imageVector = Icons.Default.Check,
-                  contentDescription = null,
-                  tint = MaterialTheme.colorScheme.tertiary,
-                  modifier = Modifier.size(16.dp),
-              )
+              Row(
+                  verticalAlignment = Alignment.CenterVertically,
+                  horizontalArrangement = Arrangement.spacedBy(8.dp),
+              ) {
+                Icon(
+                    imageVector = Icons.Default.Check,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.tertiary,
+                    modifier = Modifier.size(16.dp),
+                )
+                Text(
+                    "Stock updated automatically",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.outline,
+                )
+              }
               Text(
-                  "Stock updated automatically",
-                  style = MaterialTheme.typography.bodyMedium,
+                  lastSale.timestamp,
+                  style = MaterialTheme.typography.bodySmall,
                   color = MaterialTheme.colorScheme.outline,
               )
             }
-            Text(
-                "9:42 AM",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.outline,
-            )
           }
         }
       }
@@ -233,7 +257,7 @@ fun DashboardScreen(
 }
 
 @Composable
-fun SaleDetailItemRow(item: SaleItem) {
+fun OrderItemDetailRow(item: OrderItem) {
   Card(
       modifier = Modifier.fillMaxWidth(),
       shape = MaterialTheme.shapes.medium,
@@ -248,22 +272,22 @@ fun SaleDetailItemRow(item: SaleItem) {
           horizontalArrangement = Arrangement.spacedBy(12.dp),
           verticalAlignment = Alignment.CenterVertically,
       ) {
-        Text(item.emoji, fontSize = 24.sp)
+        Text(item.product.emoji ?: "📦", fontSize = 24.sp)
         Column {
           Text(
-              text = item.name,
+              text = item.product.name,
               style = MaterialTheme.typography.bodyLarge,
               fontWeight = FontWeight.Bold,
           )
           Text(
-              text = "Qty: ${item.qty} - $${item.unitPrice} unit",
+              text = "Qty: ${item.quantity} · ₡${item.product.price} unit",
               style = MaterialTheme.typography.bodySmall,
               color = MaterialTheme.colorScheme.outline,
           )
         }
       }
       Text(
-          text = "$${item.qty * item.unitPrice}",
+          text = "₡${item.subtotal}",
           style = MaterialTheme.typography.titleMedium,
           fontWeight = FontWeight.Bold,
       )
