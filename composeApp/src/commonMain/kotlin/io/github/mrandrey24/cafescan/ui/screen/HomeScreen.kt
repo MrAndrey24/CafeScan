@@ -28,6 +28,9 @@ import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Inventory
 import androidx.compose.material.icons.filled.LocalOffer
 import androidx.compose.material.icons.filled.QrCodeScanner
+import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -226,6 +229,37 @@ fun HomeScreen(
               color = MaterialTheme.colorScheme.onSurface,
               fontSize = 36.sp,
           )
+        }
+      }
+
+      // Purchase / Charge Button
+      item {
+        Spacer(modifier = Modifier.height(8.dp))
+        Button(
+            onClick = {
+              viewModel.checkout()
+              onNavigateToDashboard()
+            },
+            modifier = Modifier.fillMaxWidth().height(56.dp),
+            shape = MaterialTheme.shapes.large,
+            enabled = uiState.basket.isNotEmpty(),
+            colors =
+                ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                ),
+        ) {
+          Row(
+              verticalAlignment = Alignment.CenterVertically,
+              horizontalArrangement = Arrangement.spacedBy(8.dp),
+          ) {
+            Icon(Icons.Default.ShoppingCart, contentDescription = "Purchase")
+            Text(
+                text = if (uiState.basket.isNotEmpty()) "Charge ₡${uiState.totalAmount}" else "Basket is empty",
+                fontWeight = FontWeight.Bold,
+                fontSize = 16.sp,
+            )
+          }
         }
       }
     }

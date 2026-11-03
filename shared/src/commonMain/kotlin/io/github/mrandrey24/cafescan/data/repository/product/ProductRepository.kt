@@ -33,4 +33,8 @@ class ProductRepository(private val localProductDataSource: IProductLocalDataSou
   override suspend fun deleteProduct(id: Long) {
     localProductDataSource.deleteProduct(id)
   }
+
+  override suspend fun decrementStock(productId: Long, qty: Long) {
+    localProductDataSource.decrementStock(productId, qty)
+  }
 }

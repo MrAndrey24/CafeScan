@@ -88,6 +88,11 @@ class ProductLocalDataSource(database: AppDatabase) : IProductLocalDataSource {
     dbQuery.deleteProduct(id = id)
   }
 
+  override suspend fun decrementStock(productId: Long, qty: Long) {
+    val now = Clock.System.now().toEpochMilliseconds()
+    dbQuery.decrementStock(qty = qty, updatedAt = now, productId = productId)
+  }
+
   private fun mapProductSelecting(
       id: Long,
       name: String,
