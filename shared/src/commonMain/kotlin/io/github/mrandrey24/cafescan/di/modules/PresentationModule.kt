@@ -11,6 +11,7 @@ package io.github.mrandrey24.cafescan.di.modules
 import io.github.mrandrey24.cafescan.presentation.InventoryViewModel
 import io.github.mrandrey24.cafescan.presentation.ProductViewModel
 import io.github.mrandrey24.cafescan.presentation.QrViewModel
+import io.github.mrandrey24.cafescan.presentation.SaleViewModel
 import io.github.mrandrey24.cafescan.presentation.ScannerViewModel
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
@@ -20,4 +21,5 @@ val presentationModule = module {
   viewModel { QrViewModel(get()) }
   viewModel { ScannerViewModel(get(), get()) }
   viewModel { InventoryViewModel(get(), get(), get()) }
+  viewModel { SaleViewModel(get()) }
 }

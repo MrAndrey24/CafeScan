@@ -14,10 +14,14 @@ import io.github.mrandrey24.cafescan.data.local.inventory.IInventoryLocalDataSou
 import io.github.mrandrey24.cafescan.data.local.inventory.InventoryLocalDataSource
 import io.github.mrandrey24.cafescan.data.local.product.IProductLocalDataSource
 import io.github.mrandrey24.cafescan.data.local.product.ProductLocalDataSource
+import io.github.mrandrey24.cafescan.data.local.sale.ISaleLocalDataSource
+import io.github.mrandrey24.cafescan.data.local.sale.SaleLocalDataSource
 import io.github.mrandrey24.cafescan.data.repository.inventory.IInventoryRepository
 import io.github.mrandrey24.cafescan.data.repository.inventory.InventoryRepository
 import io.github.mrandrey24.cafescan.data.repository.product.IProductRepository
 import io.github.mrandrey24.cafescan.data.repository.product.ProductRepository
+import io.github.mrandrey24.cafescan.data.repository.sale.ISaleRepository
+import io.github.mrandrey24.cafescan.data.repository.sale.SaleRepository
 import org.koin.dsl.module
 
 val dataModule = module {
@@ -28,4 +32,6 @@ val dataModule = module {
   single<IProductRepository> { ProductRepository(get()) }
   single<IInventoryLocalDataSource> { InventoryLocalDataSource(get()) }
   single<IInventoryRepository> { InventoryRepository(get()) }
+  single<ISaleLocalDataSource> { SaleLocalDataSource(get()) }
+  single<ISaleRepository> { SaleRepository(get()) }
 }

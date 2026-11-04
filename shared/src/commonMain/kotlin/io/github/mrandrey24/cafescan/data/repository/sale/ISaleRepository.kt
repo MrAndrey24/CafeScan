@@ -8,4 +8,10 @@
  */
 package io.github.mrandrey24.cafescan.data.repository.sale
 
-interface ISaleRepository {}
+import io.github.mrandrey24.cafescan.domain.entities.Sale
+
+interface ISaleRepository {
+  suspend fun saveSale(sale: Sale): Sale
+
+  suspend fun getSalesForDateRange(startMs: Long, endMs: Long): List<Sale>
+}
