@@ -168,8 +168,4 @@ class ScannerViewModel(
   fun clearScanError() {
     _uiState.update { it.copy(scanError = null) }
   }
-
-  fun clearOrder() {
-    _uiState.update { ScannerUiState() }
-  }
 }
