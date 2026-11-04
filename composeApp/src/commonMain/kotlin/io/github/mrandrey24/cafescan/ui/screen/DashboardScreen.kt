@@ -161,7 +161,7 @@ fun DashboardScreen(
             MetricCard(
                 label = "Total Charged",
                 value = if (lastSale != null) "₡${lastSale.totalCharged}" else "₡0.0",
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
             )
             MetricCard(
                 label = "Est. Profit",
@@ -180,7 +180,7 @@ fun DashboardScreen(
             MetricCard(
                 label = "Daily Total",
                 value = if (lastSale != null) "₡${lastSale.totalCharged}" else "₡0.0",
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
             )
           }
         }
@@ -203,12 +203,13 @@ fun DashboardScreen(
         item {
           Box(
               modifier = Modifier.fillMaxWidth().padding(24.dp),
-              contentAlignment = Alignment.Center
+              contentAlignment = Alignment.Center,
           ) {
             Text(
-                text = "No purchase recorded yet. Scan products on the Scanner screen to make a purchase.",
+                text =
+                    "No purchase recorded yet. Scan products on the Scanner screen to make a purchase.",
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.outline
+                color = MaterialTheme.colorScheme.outline,
             )
           }
         }
