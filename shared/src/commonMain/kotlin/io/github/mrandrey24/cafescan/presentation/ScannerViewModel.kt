@@ -100,6 +100,13 @@ class ScannerViewModel(
     }
   }
 
+  fun onRemoveItem(productId: String) {
+    _uiState.update { state ->
+      val updated = state.basket.filterNot { it.product.id == productId.toLong() }
+      state.copy(basket = updated)
+    }
+  }
+
   fun checkout() {
     viewModelScope.launch {
       try {

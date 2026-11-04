@@ -24,6 +24,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Inventory
 import androidx.compose.material.icons.filled.LocalOffer
@@ -193,8 +194,25 @@ fun HomeScreen(
               fontWeight = FontWeight.Bold,
               color = MaterialTheme.colorScheme.onSurface,
           )
-          TextButton(onClick = { viewModel.clearBasket() }) {
-            Text("Clear all", color = MaterialTheme.colorScheme.primary)
+          if (uiState.basket.isNotEmpty()) {
+            TextButton(onClick = { viewModel.clearBasket() }) {
+              Row(
+                  verticalAlignment = Alignment.CenterVertically,
+                  horizontalArrangement = Arrangement.spacedBy(4.dp),
+              ) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = "Clear all",
+                    tint = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.size(18.dp),
+                )
+                Text(
+                    "Clear all",
+                    color = MaterialTheme.colorScheme.error,
+                    fontWeight = FontWeight.Bold,
+                )
+              }
+            }
           }
         }
       }
@@ -205,6 +223,7 @@ fun HomeScreen(
             item = item,
             onIncrease = { viewModel.onIncreaseQty(item.product.id.toString()) },
             onDecrease = { viewModel.onDecreaseQty(item.product.id.toString()) },
+            onRemove = { viewModel.onRemoveItem(item.product.id.toString()) },
         )
       }
 

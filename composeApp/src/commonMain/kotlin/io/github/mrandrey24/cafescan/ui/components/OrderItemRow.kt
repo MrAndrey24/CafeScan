@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -42,6 +43,7 @@ fun OrderItemRow(
     onIncrease: () -> Unit,
     onDecrease: () -> Unit,
     modifier: Modifier = Modifier,
+    onRemove: (() -> Unit)? = null,
 ) {
   Card(
       modifier = modifier.fillMaxWidth(),
@@ -52,12 +54,12 @@ fun OrderItemRow(
     Row(
         modifier = Modifier.padding(16.dp).fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
     ) {
       // Icon Placeholder
       Box(
           modifier =
-              Modifier.size(56.dp)
+              Modifier.size(52.dp)
                   .background(
                       MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
                       RoundedCornerShape(12.dp),
@@ -76,7 +78,7 @@ fun OrderItemRow(
             color = MaterialTheme.colorScheme.onSurface,
         )
         Text(
-            text = "$${item.product.price}",
+            text = "₡${item.product.price}",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.outline,
         )
@@ -91,7 +93,7 @@ fun OrderItemRow(
         Row(
             modifier = Modifier.padding(horizontal = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
         ) {
           IconButton(onClick = onDecrease, modifier = Modifier.size(32.dp)) {
             Icon(
@@ -115,6 +117,20 @@ fun OrderItemRow(
                 modifier = Modifier.size(16.dp),
             )
           }
+        }
+      }
+
+      if (onRemove != null) {
+        IconButton(
+            onClick = onRemove,
+            modifier = Modifier.size(36.dp),
+        ) {
+          Icon(
+              imageVector = Icons.Default.Delete,
+              contentDescription = "Remove item",
+              tint = MaterialTheme.colorScheme.error,
+              modifier = Modifier.size(20.dp),
+          )
         }
       }
     }
