@@ -13,6 +13,8 @@ import io.github.mrandrey24.cafescan.domain.usecases.inventory.GetAllActiveWithS
 import io.github.mrandrey24.cafescan.domain.usecases.product.CheckProductNameExistsUseCase
 import io.github.mrandrey24.cafescan.domain.usecases.product.DeleteProductUseCase
 import io.github.mrandrey24.cafescan.domain.usecases.product.SaveProductUseCase
+import io.github.mrandrey24.cafescan.domain.usecases.scanner.DecrementStockUseCase
+import io.github.mrandrey24.cafescan.domain.usecases.scanner.GetProductByIdUseCase
 import org.koin.dsl.module
 
 val domainModule = module {
@@ -21,4 +23,6 @@ val domainModule = module {
   factory { GetAllActiveWithStockUseCase(get()) }
   factory { UpdateStockUseCase(get()) }
   factory { DeleteProductUseCase(get()) }
+  factory { DecrementStockUseCase(get()) }
+  factory { GetProductByIdUseCase(get()) }
 }

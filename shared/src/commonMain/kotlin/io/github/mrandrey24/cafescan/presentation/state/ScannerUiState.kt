@@ -11,9 +11,17 @@ package io.github.mrandrey24.cafescan.presentation.state
 import io.github.mrandrey24.cafescan.domain.entities.OrderItem
 import io.github.mrandrey24.cafescan.domain.entities.Product
 
+data class LastSale(
+    val items: List<OrderItem> = emptyList(),
+    val totalCharged: Double = 0.0,
+    val estProfit: Double = 0.0,
+    val timestamp: String = "",
+)
+
 data class ScannerUiState(
     val basket: List<OrderItem> = emptyList(),
     val scannedProduct: Product? = null,
+    val lastSale: LastSale? = null,
     val scanError: ScanError? = null,
     val isScanning: Boolean = true,
     val errorMessage: String? = null,

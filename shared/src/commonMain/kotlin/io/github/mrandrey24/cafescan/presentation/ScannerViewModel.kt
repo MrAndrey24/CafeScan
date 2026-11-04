@@ -10,18 +10,23 @@ package io.github.mrandrey24.cafescan.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import io.github.mrandrey24.cafescan.data.repository.product.IProductRepository
 import io.github.mrandrey24.cafescan.domain.entities.OrderItem
 import io.github.mrandrey24.cafescan.domain.entities.QrPayload
+import io.github.mrandrey24.cafescan.domain.usecases.scanner.DecrementStockUseCase
+import io.github.mrandrey24.cafescan.domain.usecases.scanner.GetProductByIdUseCase
+import io.github.mrandrey24.cafescan.presentation.state.LastSale
 import io.github.mrandrey24.cafescan.presentation.state.ScanError
 import io.github.mrandrey24.cafescan.presentation.state.ScannerUiState
+import kotlin.time.Clock
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlin.time.Clock
 
-class ScannerViewModel(private val productRepository: IProductRepository) : ViewModel() {
+class ScannerViewModel(
+    private val getProductByIdUseCase: GetProductByIdUseCase,
+    private val decrementStockUseCase: DecrementStockUseCase,
+) : ViewModel() {
   private val _uiState = MutableStateFlow(ScannerUiState())
   val uiState = _uiState.asStateFlow()
 
@@ -45,7 +50,7 @@ class ScannerViewModel(private val productRepository: IProductRepository) : View
           return@launch
         }
 
-        val product = productRepository.retrieveProductById(payload.id.toLong())
+        val product = getProductByIdUseCase(payload.id.toLong())
 
         if (product == null) {
           _uiState.update { it.copy(scanError = ScanError.ProductNotFound) }
@@ -101,15 +106,52 @@ class ScannerViewModel(private val productRepository: IProductRepository) : View
         val currentBasket = _uiState.value.basket
         if (currentBasket.isEmpty()) return@launch
 
+        val totalCharged = currentBasket.sumOf { it.subtotal }
+        val estProfit = currentBasket.sumOf { (it.product.price - it.product.cost) * it.quantity }
+
         currentBasket.forEach { item ->
-          productRepository.decrementStock(item.product.id, item.quantity.toLong())
+          decrementStockUseCase(item.product.id, item.quantity.toLong())
         }
 
-        clearBasket()
+        val nowMs = Clock.System.now().toEpochMilliseconds()
+        val timeString = formatTime(nowMs)
+
+        val completedSale =
+            LastSale(
+                items = currentBasket,
+                totalCharged = totalCharged,
+                estProfit = estProfit,
+                timestamp = timeString,
+            )
+
+        _uiState.update { state ->
+          state.copy(
+              basket = emptyList(),
+              lastSale = completedSale,
+              scanError = null,
+          )
+        }
       } catch (e: Exception) {
         _uiState.update { it.copy(errorMessage = e.message) }
       }
     }
+  }
+
+  private fun formatTime(epochMs: Long): String {
+    val totalSeconds = epochMs / 1000
+    val totalMinutes = totalSeconds / 60
+    val totalHours = totalMinutes / 60
+    val currentMinute = (totalMinutes % 60).toInt()
+    val currentHour24 = (totalHours % 24).toInt()
+    val isPm = currentHour24 >= 12
+    val hour12 =
+        when (val h = currentHour24 % 12) {
+          0 -> 12
+          else -> h
+        }
+    val minStr = if (currentMinute < 10) "0$currentMinute" else "$currentMinute"
+    val amPm = if (isPm) "PM" else "AM"
+    return "$hour12:$minStr $amPm"
   }
 
   fun clearBasket() {

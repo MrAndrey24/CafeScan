@@ -255,7 +255,9 @@ fun HomeScreen(
           ) {
             Icon(Icons.Default.ShoppingCart, contentDescription = "Purchase")
             Text(
-                text = if (uiState.basket.isNotEmpty()) "Charge ₡${uiState.totalAmount}" else "Basket is empty",
+                text =
+                    if (uiState.basket.isNotEmpty()) "Charge ₡${uiState.totalAmount}"
+                    else "Basket is empty",
                 fontWeight = FontWeight.Bold,
                 fontSize = 16.sp,
             )
