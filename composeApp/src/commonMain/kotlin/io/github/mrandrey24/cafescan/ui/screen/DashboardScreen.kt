@@ -44,6 +44,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -53,6 +54,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.mrandrey24.cafescan.domain.entities.OrderItem
+import io.github.mrandrey24.cafescan.presentation.SaleViewModel
 import io.github.mrandrey24.cafescan.presentation.ScannerViewModel
 import io.github.mrandrey24.cafescan.ui.components.MetricCard
 
@@ -63,10 +65,20 @@ fun DashboardScreen(
     onNavigateToScanner: () -> Unit,
     onNavigateToInventory: () -> Unit,
     onNavigateToCatalog: () -> Unit,
-    viewModel: ScannerViewModel,
+    saleViewModel: SaleViewModel,
+    scannerViewModel: ScannerViewModel,
 ) {
-  val uiState by viewModel.uiState.collectAsState()
-  val lastSale = uiState.lastSale
+  val saleUiState by saleViewModel.uiState.collectAsState()
+  val scannerUiState by scannerViewModel.uiState.collectAsState()
+  val lastSale = scannerUiState.lastSale
+
+  LaunchedEffect(Unit) {
+    saleViewModel.loadTodaySales()
+  }
+
+  val displayTotalCharged = if (saleUiState.todaySales.isNotEmpty()) saleUiState.totalChargedToday else (lastSale?.totalCharged ?: 0.0)
+  val displayEstProfit = if (saleUiState.todaySales.isNotEmpty()) saleUiState.totalProfitToday else (lastSale?.estProfit ?: 0.0)
+  val displayItems = if (saleUiState.todaySales.isNotEmpty()) saleUiState.totalItemsToday else (lastSale?.items?.sumOf { it.quantity } ?: 0)
 
   Scaffold(
       topBar = {
@@ -160,12 +172,12 @@ fun DashboardScreen(
           Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             MetricCard(
                 label = "Total Charged",
-                value = if (lastSale != null) "₡${lastSale.totalCharged}" else "₡0.0",
+                value = "₡${displayTotalCharged}",
                 modifier = Modifier.weight(1f),
             )
             MetricCard(
                 label = "Est. Profit",
-                value = if (lastSale != null) "+₡${lastSale.estProfit}" else "₡0.0",
+                value = "+₡${displayEstProfit}",
                 valueColor = MaterialTheme.colorScheme.tertiary,
                 modifier = Modifier.weight(1f),
             )
@@ -173,13 +185,13 @@ fun DashboardScreen(
           Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             MetricCard(
                 label = "Items",
-                value = if (lastSale != null) "${lastSale.items.sumOf { it.quantity }}" else "0",
+                value = "${displayItems}",
                 icon = Icons.Default.Inventory,
                 modifier = Modifier.weight(1f),
             )
             MetricCard(
                 label = "Daily Total",
-                value = if (lastSale != null) "₡${lastSale.totalCharged}" else "₡0.0",
+                value = "₡${displayTotalCharged}",
                 modifier = Modifier.weight(1f),
             )
           }
@@ -189,7 +201,7 @@ fun DashboardScreen(
       // Section Header
       item {
         Text(
-            text = "This sale's detail",
+            text = "Today's Sales Breakdown",
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
@@ -197,8 +209,16 @@ fun DashboardScreen(
       }
 
       // Detail List
-      if (lastSale != null && lastSale.items.isNotEmpty()) {
-        items(lastSale.items) { item -> OrderItemDetailRow(item) }
+      val recentSaleItems = if (saleUiState.todaySales.isNotEmpty()) {
+        saleUiState.todaySales.flatMap { it.items }
+      } else if (lastSale != null) {
+        lastSale.items
+      } else {
+        emptyList()
+      }
+
+      if (recentSaleItems.isNotEmpty()) {
+        items(recentSaleItems) { item -> OrderItemDetailRow(item) }
       } else {
         item {
           Box(
@@ -207,7 +227,7 @@ fun DashboardScreen(
           ) {
             Text(
                 text =
-                    "No purchase recorded yet. Scan products on the Scanner screen to make a purchase.",
+                    "No sales registered today. Scan products on the Scanner screen to make a purchase.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.outline,
             )

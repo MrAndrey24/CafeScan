@@ -12,7 +12,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.github.mrandrey24.cafescan.domain.entities.OrderItem
 import io.github.mrandrey24.cafescan.domain.entities.QrPayload
-import io.github.mrandrey24.cafescan.domain.usecases.scanner.DecrementStockUseCase
+import io.github.mrandrey24.cafescan.domain.usecases.sale.SaveSaleUseCase
 import io.github.mrandrey24.cafescan.domain.usecases.scanner.GetProductByIdUseCase
 import io.github.mrandrey24.cafescan.presentation.state.LastSale
 import io.github.mrandrey24.cafescan.presentation.state.ScanError
@@ -25,7 +25,7 @@ import kotlinx.coroutines.launch
 
 class ScannerViewModel(
     private val getProductByIdUseCase: GetProductByIdUseCase,
-    private val decrementStockUseCase: DecrementStockUseCase,
+    private val saveSaleUseCase: SaveSaleUseCase,
 ) : ViewModel() {
   private val _uiState = MutableStateFlow(ScannerUiState())
   val uiState = _uiState.asStateFlow()
@@ -113,28 +113,18 @@ class ScannerViewModel(
         val currentBasket = _uiState.value.basket
         if (currentBasket.isEmpty()) return@launch
 
-        val totalCharged = currentBasket.sumOf { it.subtotal }
-        val estProfit = currentBasket.sumOf { (it.product.price - it.product.cost) * it.quantity }
-
-        currentBasket.forEach { item ->
-          decrementStockUseCase(item.product.id, item.quantity.toLong())
-        }
-
-        val nowMs = Clock.System.now().toEpochMilliseconds()
-        val timeString = formatTime(nowMs)
-
-        val completedSale =
-            LastSale(
-                items = currentBasket,
-                totalCharged = totalCharged,
-                estProfit = estProfit,
-                timestamp = timeString,
-            )
+        val savedSale = saveSaleUseCase(currentBasket)
 
         _uiState.update { state ->
           state.copy(
               basket = emptyList(),
-              lastSale = completedSale,
+              lastSale =
+                  LastSale(
+                      items = savedSale.items,
+                      totalCharged = savedSale.total,
+                      estProfit = savedSale.profit,
+                      timestamp = formatTime(savedSale.timestamp),
+                  ),
               scanError = null,
           )
         }
