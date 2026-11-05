@@ -73,7 +73,19 @@ class ProductViewModel(
 
   fun onEmojiChange(emoji: String) = _uiState.update { it.copy(emoji = emoji) }
 
-  fun clearSaveState() = _uiState.update { it.copy(isSaved = false, savedProductId = null) }
+  fun clearSaveState() =
+      _uiState.update {
+        it.copy(
+            isSaved = false,
+            savedProductId = null,
+            name = "",
+            price = "",
+            cost = "",
+            stock = "",
+            emoji = "",
+            isProductNameExists = false,
+        )
+      }
 
   fun clearError() {
     _uiState.update { it.copy(errorMessage = null) }

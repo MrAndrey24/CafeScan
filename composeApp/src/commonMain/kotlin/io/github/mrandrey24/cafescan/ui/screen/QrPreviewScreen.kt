@@ -52,6 +52,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -59,6 +60,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.mrandrey24.cafescan.presentation.QrViewModel
+import io.github.mrandrey24.cafescan.ui.components.StatSmallCard
 import qrgenerator.QRCodeImage
 import qrgenerator.shareQrCodeImage
 
@@ -187,12 +189,14 @@ fun QrPreviewScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
           if (product.qrString != null) {
-            QRCodeImage(
-                modifier = Modifier.size(200.dp),
-                url = product.qrString!!,
-                contentDescription = "QR de ${product.name}",
-                onSuccess = { bitmap -> bitmap?.let { viewModel.onQrBitmapReady(it) } },
-            )
+            key(product.id) {
+              QRCodeImage(
+                  modifier = Modifier.size(200.dp),
+                  url = product.qrString!!,
+                  contentDescription = "QR de ${product.name}",
+                  onSuccess = { bitmap -> bitmap?.let { viewModel.onQrBitmapReady(it) } },
+              )
+            }
           } else {
             Box(
                 modifier =
@@ -288,38 +292,6 @@ fun QrPreviewScreen(
       }
 
       Spacer(modifier = Modifier.height(24.dp))
-    }
-  }
-}
-
-@Composable
-fun StatSmallCard(
-    label: String,
-    value: String,
-    valueColor: Color = Color.Black,
-    modifier: Modifier = Modifier,
-) {
-  Card(
-      modifier = modifier.height(80.dp),
-      shape = MaterialTheme.shapes.large,
-      colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-  ) {
-    Column(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-    ) {
-      Text(
-          label,
-          style = MaterialTheme.typography.labelSmall,
-          color = MaterialTheme.colorScheme.outline,
-      )
-      Text(
-          value,
-          style = MaterialTheme.typography.titleMedium,
-          fontWeight = FontWeight.Bold,
-          color = valueColor,
-      )
     }
   }
 }
