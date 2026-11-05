@@ -12,7 +12,6 @@ import io.github.mrandrey24.cafescan.data.repository.sale.ISaleRepository
 import io.github.mrandrey24.cafescan.domain.entities.SalesSummaryResult
 import kotlin.time.Clock
 
-
 class GetSalesSummaryUseCase(private val saleRepository: ISaleRepository) {
   suspend operator fun invoke(filterDays: Int): SalesSummaryResult {
     val nowMs = Clock.System.now().toEpochMilliseconds()
