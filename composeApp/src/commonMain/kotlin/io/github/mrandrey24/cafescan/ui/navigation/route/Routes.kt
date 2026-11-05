@@ -27,3 +27,5 @@ import kotlinx.serialization.Serializable
 @Serializable object SaleDetailRoute
 
 @Serializable object ScannerRoute
+
+@Serializable object SalesSummaryRoute

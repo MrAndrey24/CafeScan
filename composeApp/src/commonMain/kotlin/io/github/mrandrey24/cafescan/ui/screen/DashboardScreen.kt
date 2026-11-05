@@ -9,6 +9,7 @@
 package io.github.mrandrey24.cafescan.ui.screen
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,6 +25,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Analytics
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Inventory
@@ -65,6 +67,7 @@ fun DashboardScreen(
     onNavigateToScanner: () -> Unit,
     onNavigateToInventory: () -> Unit,
     onNavigateToCatalog: () -> Unit,
+    onNavigateToSummary: () -> Unit = {},
     saleViewModel: SaleViewModel,
     scannerViewModel: ScannerViewModel,
 ) {
@@ -96,6 +99,15 @@ fun DashboardScreen(
                 Icon(
                     Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Back",
+                    tint = MaterialTheme.colorScheme.primary,
+                )
+              }
+            },
+            actions = {
+              IconButton(onClick = onNavigateToSummary) {
+                Icon(
+                    imageVector = Icons.Default.Analytics,
+                    contentDescription = "Analytics",
                     tint = MaterialTheme.colorScheme.primary,
                 )
               }
@@ -194,6 +206,46 @@ fun DashboardScreen(
                 value = "₡${displayTotalCharged}",
                 modifier = Modifier.weight(1f),
             )
+          }
+        }
+      }
+
+      // Sales Summary & Top Products Analytics Banner
+      item {
+        Surface(
+            modifier = Modifier.fillMaxWidth().clickable { onNavigateToSummary() },
+            shape = RoundedCornerShape(16.dp),
+            color = MaterialTheme.colorScheme.primaryContainer,
+        ) {
+          Row(
+              modifier = Modifier.padding(16.dp),
+              verticalAlignment = Alignment.CenterVertically,
+              horizontalArrangement = Arrangement.SpaceBetween,
+          ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+              Icon(
+                  imageVector = Icons.Default.Analytics,
+                  contentDescription = null,
+                  tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                  modifier = Modifier.size(24.dp),
+              )
+              Column {
+                Text(
+                    "Sales Analytics & Top Products",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                )
+                Text(
+                    "Tap to filter by day & view most sold items",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f),
+                )
+              }
+            }
           }
         }
       }

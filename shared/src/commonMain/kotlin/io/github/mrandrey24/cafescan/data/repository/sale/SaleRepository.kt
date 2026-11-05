@@ -10,6 +10,7 @@ package io.github.mrandrey24.cafescan.data.repository.sale
 
 import io.github.mrandrey24.cafescan.data.local.sale.ISaleLocalDataSource
 import io.github.mrandrey24.cafescan.domain.entities.Sale
+import io.github.mrandrey24.cafescan.domain.entities.TopProduct
 
 class SaleRepository(private val saleLocalDataSource: ISaleLocalDataSource) : ISaleRepository {
 
@@ -19,5 +20,9 @@ class SaleRepository(private val saleLocalDataSource: ISaleLocalDataSource) : IS
 
   override suspend fun getSalesForDateRange(startMs: Long, endMs: Long): List<Sale> {
     return saleLocalDataSource.getSalesForDateRange(startMs, endMs)
+  }
+
+  override suspend fun getTopProducts(startMs: Long, endMs: Long): List<TopProduct> {
+    return saleLocalDataSource.getTopProducts(startMs, endMs)
   }
 }

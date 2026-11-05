@@ -10,36 +10,41 @@ package io.github.mrandrey24.cafescan.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import io.github.mrandrey24.cafescan.domain.usecases.sale.GetTodaySalesUseCase
+import io.github.mrandrey24.cafescan.domain.usecases.sale.GetSalesSummaryUseCase
 import io.github.mrandrey24.cafescan.presentation.state.DashboardUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class SaleViewModel(private val getTodaySalesUseCase: GetTodaySalesUseCase) : ViewModel() {
+class SaleViewModel(
+    private val getSalesSummaryUseCase: GetSalesSummaryUseCase,
+) : ViewModel() {
   private val _uiState = MutableStateFlow(DashboardUiState())
   val uiState = _uiState.asStateFlow()
 
   init {
-    loadTodaySales()
+    loadSalesSummary(7)
   }
 
-  fun loadTodaySales() {
+  fun onFilterChanged(days: Int) {
+    _uiState.update { it.copy(selectedFilterDays = days) }
+    loadSalesSummary(days)
+  }
+
+  fun loadSalesSummary(days: Int = _uiState.value.selectedFilterDays) {
     viewModelScope.launch {
       _uiState.update { it.copy(isLoading = true, errorMessage = null) }
       try {
-        val todaySales = getTodaySalesUseCase()
-        val totalCharged = todaySales.sumOf { it.total }
-        val totalProfit = todaySales.sumOf { it.profit }
-        val totalItems = todaySales.sumOf { it.itemCount }
-
+        val summary = getSalesSummaryUseCase(days)
         _uiState.update {
           it.copy(
-              todaySales = todaySales,
-              totalChargedToday = totalCharged,
-              totalProfitToday = totalProfit,
-              totalItemsToday = totalItems,
+              selectedFilterDays = days,
+              todaySales = summary.sales,
+              topProducts = summary.topProducts,
+              totalChargedToday = summary.totalRevenue,
+              totalProfitToday = summary.totalProfit,
+              totalItemsToday = summary.totalItemsSold,
               isLoading = false,
           )
         }
@@ -47,5 +52,9 @@ class SaleViewModel(private val getTodaySalesUseCase: GetTodaySalesUseCase) : Vi
         _uiState.update { it.copy(isLoading = false, errorMessage = e.message) }
       }
     }
+  }
+
+  fun loadTodaySales() {
+    loadSalesSummary(_uiState.value.selectedFilterDays)
   }
 }
