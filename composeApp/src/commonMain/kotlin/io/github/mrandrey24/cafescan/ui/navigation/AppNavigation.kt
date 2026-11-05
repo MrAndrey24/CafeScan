@@ -26,6 +26,7 @@ import io.github.mrandrey24.cafescan.ui.navigation.route.LowStockRoute
 import io.github.mrandrey24.cafescan.ui.navigation.route.ProductFormRoute
 import io.github.mrandrey24.cafescan.ui.navigation.route.QrPreviewRoute
 import io.github.mrandrey24.cafescan.ui.navigation.route.SaleDetailRoute
+import io.github.mrandrey24.cafescan.ui.navigation.route.SalesSummaryRoute
 import io.github.mrandrey24.cafescan.ui.navigation.route.ScannerRoute
 import io.github.mrandrey24.cafescan.ui.screen.CatalogScreen
 import io.github.mrandrey24.cafescan.ui.screen.DashboardScreen
@@ -35,6 +36,7 @@ import io.github.mrandrey24.cafescan.ui.screen.LowStockScreen
 import io.github.mrandrey24.cafescan.ui.screen.ProductFormScreen
 import io.github.mrandrey24.cafescan.ui.screen.QrPreviewScreen
 import io.github.mrandrey24.cafescan.ui.screen.SaleDetailScreen
+import io.github.mrandrey24.cafescan.ui.screen.SalesSummaryScreen
 import io.github.mrandrey24.cafescan.ui.screen.ScannerScreen
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -62,6 +64,7 @@ fun AppNavigation() {
           onNavigateToScanner = { navController.navigate(HomeRoute) },
           onNavigateToInventory = { navController.navigate(InventoryRoute) },
           onNavigateToCatalog = { navController.navigate(CatalogRoute) },
+          onNavigateToSummary = { navController.navigate(SalesSummaryRoute) },
           saleViewModel = saleViewModel,
           scannerViewModel = scannerViewModel,
       )
@@ -109,5 +112,11 @@ fun AppNavigation() {
     composable<ProductFormRoute> { ProductFormScreen(onBack = { navController.popBackStack() }) }
     composable<SaleDetailRoute> { SaleDetailScreen(onBack = { navController.popBackStack() }) }
     composable<ScannerRoute> { ScannerScreen(onBack = { navController.popBackStack() }) }
+    composable<SalesSummaryRoute> {
+      SalesSummaryScreen(
+          onBack = { navController.popBackStack() },
+          viewModel = saleViewModel,
+      )
+    }
   }
 }

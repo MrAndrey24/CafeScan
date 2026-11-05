@@ -9,6 +9,7 @@
 package io.github.mrandrey24.cafescan.ui.screen
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,6 +25,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Analytics
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Inventory
@@ -65,6 +67,7 @@ fun DashboardScreen(
     onNavigateToScanner: () -> Unit,
     onNavigateToInventory: () -> Unit,
     onNavigateToCatalog: () -> Unit,
+    onNavigateToSummary: () -> Unit = {},
     saleViewModel: SaleViewModel,
     scannerViewModel: ScannerViewModel,
 ) {
@@ -72,13 +75,17 @@ fun DashboardScreen(
   val scannerUiState by scannerViewModel.uiState.collectAsState()
   val lastSale = scannerUiState.lastSale
 
-  LaunchedEffect(Unit) {
-    saleViewModel.loadTodaySales()
-  }
+  LaunchedEffect(Unit) { saleViewModel.loadTodaySales() }
 
-  val displayTotalCharged = if (saleUiState.todaySales.isNotEmpty()) saleUiState.totalChargedToday else (lastSale?.totalCharged ?: 0.0)
-  val displayEstProfit = if (saleUiState.todaySales.isNotEmpty()) saleUiState.totalProfitToday else (lastSale?.estProfit ?: 0.0)
-  val displayItems = if (saleUiState.todaySales.isNotEmpty()) saleUiState.totalItemsToday else (lastSale?.items?.sumOf { it.quantity } ?: 0)
+  val displayTotalCharged =
+      if (saleUiState.todaySales.isNotEmpty()) saleUiState.totalChargedToday
+      else (lastSale?.totalCharged ?: 0.0)
+  val displayEstProfit =
+      if (saleUiState.todaySales.isNotEmpty()) saleUiState.totalProfitToday
+      else (lastSale?.estProfit ?: 0.0)
+  val displayItems =
+      if (saleUiState.todaySales.isNotEmpty()) saleUiState.totalItemsToday
+      else (lastSale?.items?.sumOf { it.quantity } ?: 0)
 
   Scaffold(
       topBar = {
@@ -96,6 +103,15 @@ fun DashboardScreen(
                 Icon(
                     Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = "Back",
+                    tint = MaterialTheme.colorScheme.primary,
+                )
+              }
+            },
+            actions = {
+              IconButton(onClick = onNavigateToSummary) {
+                Icon(
+                    imageVector = Icons.Default.Analytics,
+                    contentDescription = "Analytics",
                     tint = MaterialTheme.colorScheme.primary,
                 )
               }
@@ -198,6 +214,46 @@ fun DashboardScreen(
         }
       }
 
+      // Sales Summary & Top Products Analytics Banner
+      item {
+        Surface(
+            modifier = Modifier.fillMaxWidth().clickable { onNavigateToSummary() },
+            shape = RoundedCornerShape(16.dp),
+            color = MaterialTheme.colorScheme.primaryContainer,
+        ) {
+          Row(
+              modifier = Modifier.padding(16.dp),
+              verticalAlignment = Alignment.CenterVertically,
+              horizontalArrangement = Arrangement.SpaceBetween,
+          ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+              Icon(
+                  imageVector = Icons.Default.Analytics,
+                  contentDescription = null,
+                  tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                  modifier = Modifier.size(24.dp),
+              )
+              Column {
+                Text(
+                    "Sales Analytics & Top Products",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                )
+                Text(
+                    "Tap to filter by day & view most sold items",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f),
+                )
+              }
+            }
+          }
+        }
+      }
+
       // Section Header
       item {
         Text(
@@ -209,13 +265,14 @@ fun DashboardScreen(
       }
 
       // Detail List
-      val recentSaleItems = if (saleUiState.todaySales.isNotEmpty()) {
-        saleUiState.todaySales.flatMap { it.items }
-      } else if (lastSale != null) {
-        lastSale.items
-      } else {
-        emptyList()
-      }
+      val recentSaleItems =
+          if (saleUiState.todaySales.isNotEmpty()) {
+            saleUiState.todaySales.flatMap { it.items }
+          } else if (lastSale != null) {
+            lastSale.items
+          } else {
+            emptyList()
+          }
 
       if (recentSaleItems.isNotEmpty()) {
         items(recentSaleItems) { item -> OrderItemDetailRow(item) }

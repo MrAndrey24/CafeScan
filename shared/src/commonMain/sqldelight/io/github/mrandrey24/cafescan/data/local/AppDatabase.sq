@@ -36,7 +36,6 @@ CREATE TABLE SaleItems (
 );
 
 -- PRODUCT QUERIES
-
 CREATE UNIQUE INDEX idx_products_active_name
 ON Products(LOWER(name)) WHERE is_active = 1;
 
@@ -62,20 +61,9 @@ SET price      = :price,
     updated_at = :updatedAt
 WHERE id = :id;
 
-updateQrString:
-UPDATE Products
-SET qr_string = :qrString, updated_at = :updatedAt   -- arreglé el typo "updateAt"
-WHERE id = :id;
-
 deleteProduct:
 DELETE FROM Products
 WHERE id = :id;
---
--- softDeleteProduct:
--- UPDATE Products
--- SET is_active = 0,
---     updated_at = :updated_at
--- WHERE id = :id;
 
 selectAllProducts:
 SELECT * FROM Products;
@@ -94,8 +82,8 @@ AND is_active = 1;
 lastInsertRowId:
 SELECT last_insert_rowid();
 
--- STOCK QUERIES
 
+-- STOCK QUERIES
 insertOrIgnoreStock:
 INSERT OR IGNORE INTO Stocks(product_id, current_qty, initial_qty, low_stock_threshold, updated_at)
 VALUES (:product_id, :current_qty, :initial_qty, :low_stock_threshold, :updated_at);
@@ -118,50 +106,11 @@ LEFT JOIN Stocks s ON s.product_id = p.id
 WHERE p.is_active = 1
 ORDER BY p.name ASC;
 
-getProductsWithQrStatus:
-SELECT
-    p.id,
-    p.name,
-    p.price,
-    p.cost,
-    p.emoji,
-    p.qr_string,
-    p.is_active,
-    CASE WHEN p.qr_string != '' THEN 1 ELSE 0 END AS has_qr
-FROM Products p
-WHERE p.is_active = 1
-ORDER BY p.name ASC;
-
-observeAllStock:
-SELECT
-    s.product_id,
-    s.current_qty,
-    s.initial_qty,
-    s.low_stock_threshold,
-    s.updated_at
-FROM Stocks s
-INNER JOIN Products p ON p.id = s.product_id
-WHERE p.is_active = 1
-ORDER BY p.name ASC;
-
 decrementStock:
 UPDATE Stocks
 SET current_qty = MAX(0, current_qty - :qty),
     updated_at  = :updatedAt
 WHERE product_id = :productId;
-
-setInitialStock:
-UPDATE Stocks
-SET current_qty         = :qty,
-    initial_qty         = :qty,
-    updated_at          = :updatedAt
-WHERE product_id        = :productId;
-
-updateStockThreshold:
-UPDATE Stocks
-SET low_stock_threshold = :threshold,
-    updated_at          = :updatedAt
-WHERE product_id        = :productId;
 
 updateStockQty:
 UPDATE Stocks
@@ -170,8 +119,8 @@ SET current_qty = :currentQty,
     updated_at  = :updatedAt
 WHERE product_id = :productId;
 
-getStockByProductId:
-SELECT * FROM Stocks WHERE product_id = :productId;
+
+
 
 -- SALES QUERIES
 insertSale:
@@ -182,15 +131,13 @@ insertSaleItem:
 INSERT INTO SaleItems(sale_id, product_id, quantity, unit_price, unit_cost, subtotal)
 VALUES (:saleId, :productId, :quantity, :unitPrice, :unitCost, :subtotal);
 
-
-
 getSalesByDateRange:
 SELECT id, timestamp, total, profit
 FROM Sales
 WHERE timestamp >= :startMs AND timestamp < :endMs
 ORDER BY timestamp DESC;
 
--- Trae los ítems de una venta con datos del producto
+-- Retrieve the items from a sale along with product details
 getSaleItemsBySaleId:
 SELECT
     si.id,
@@ -207,29 +154,18 @@ FROM SaleItems si
 INNER JOIN Products p ON p.id = si.product_id
 WHERE si.sale_id = :saleId;
 
--- Para el top product del dashboard
-getTopProductByDateRange:
+-- Top-selling products by date range
+getTopProductsByDateRange:
 SELECT
     p.id,
     p.name,
+    p.price,
     p.emoji,
-    SUM(si.quantity) AS total_sold
+    SUM(si.quantity) AS total_sold,
+    SUM(si.subtotal) AS total_revenue
 FROM SaleItems si
 INNER JOIN Products p ON p.id = si.product_id
 INNER JOIN Sales s    ON s.id  = si.sale_id
 WHERE s.timestamp >= :startMs AND s.timestamp < :endMs
 GROUP BY p.id
-ORDER BY total_sold DESC
-LIMIT 1;
-
--- Para tendencias semanales
-getDailySalesSummary:
-SELECT
-    timestamp,
-    SUM(total)  AS day_total,
-    SUM(profit) AS day_profit,
-    COUNT(*)    AS sale_count
-FROM Sales
-WHERE timestamp >= :startMs AND timestamp < :endMs
-GROUP BY (timestamp / 86400000)
-ORDER BY timestamp ASC;
+ORDER BY total_sold DESC;

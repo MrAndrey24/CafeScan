@@ -12,6 +12,7 @@ import io.github.mrandrey24.cafescan.data.local.AppDatabase
 import io.github.mrandrey24.cafescan.domain.entities.OrderItem
 import io.github.mrandrey24.cafescan.domain.entities.Product
 import io.github.mrandrey24.cafescan.domain.entities.Sale
+import io.github.mrandrey24.cafescan.domain.entities.TopProduct
 import kotlin.time.Clock
 
 class SaleLocalDataSource(database: AppDatabase) : ISaleLocalDataSource {
@@ -71,6 +72,20 @@ class SaleLocalDataSource(database: AppDatabase) : ISaleLocalDataSource {
           id = saleRow.id.toString(),
           items = orderItems,
           timestamp = saleRow.timestamp,
+      )
+    }
+  }
+
+  override suspend fun getTopProducts(startMs: Long, endMs: Long): List<TopProduct> {
+    val rows = dbQuery.getTopProductsByDateRange(startMs, endMs).executeAsList()
+    return rows.map { row ->
+      TopProduct(
+          id = row.id,
+          name = row.name,
+          price = row.price,
+          emoji = row.emoji,
+          totalSold = row.total_sold ?: 0L,
+          totalRevenue = row.total_revenue ?: 0.0,
       )
     }
   }

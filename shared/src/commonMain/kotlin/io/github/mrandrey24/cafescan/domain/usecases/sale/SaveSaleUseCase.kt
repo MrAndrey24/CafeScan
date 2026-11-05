@@ -23,9 +23,7 @@ class SaveSaleUseCase(
     val sale = Sale(id = now.toString(), items = items, timestamp = now)
     val savedSale = saleRepository.saveSale(sale)
 
-    items.forEach { item ->
-      decrementStockUseCase(item.product.id, item.quantity.toLong())
-    }
+    items.forEach { item -> decrementStockUseCase(item.product.id, item.quantity.toLong()) }
 
     return savedSale
   }
