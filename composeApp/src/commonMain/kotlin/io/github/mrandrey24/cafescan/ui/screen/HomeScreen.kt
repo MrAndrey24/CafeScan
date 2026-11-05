@@ -11,9 +11,9 @@ package io.github.mrandrey24.cafescan.ui.screen
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -168,119 +168,114 @@ fun HomeScreen(
       },
       containerColor = MaterialTheme.colorScheme.background,
   ) { padding ->
-    LazyColumn(
+    Column(
         modifier = Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        contentPadding = PaddingValues(bottom = 24.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
       // Scanner Section
-      item {
-        QrPreviewCard(
-            onScan = { rawString -> viewModel.onQrScanned(rawString) },
-            modifier = Modifier.padding(top = 8.dp),
-        )
-      }
+      QrPreviewCard(
+          onScan = { rawString -> viewModel.onQrScanned(rawString) },
+          modifier = Modifier.padding(top = 8.dp),
+      )
 
       // Basket Header
-      item {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-          Text(
-              "Scanned Basket",
-              style = MaterialTheme.typography.titleLarge,
-              fontWeight = FontWeight.Bold,
-              color = MaterialTheme.colorScheme.onSurface,
-          )
-          if (uiState.basket.isNotEmpty()) {
-            TextButton(onClick = { viewModel.clearBasket() }) {
-              Row(
-                  verticalAlignment = Alignment.CenterVertically,
-                  horizontalArrangement = Arrangement.spacedBy(4.dp),
-              ) {
-                Icon(
-                    imageVector = Icons.Default.Delete,
-                    contentDescription = "Clear all",
-                    tint = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.size(18.dp),
-                )
-                Text(
-                    "Clear all",
-                    color = MaterialTheme.colorScheme.error,
-                    fontWeight = FontWeight.Bold,
-                )
-              }
+      Row(
+          modifier = Modifier.fillMaxWidth(),
+          horizontalArrangement = Arrangement.SpaceBetween,
+          verticalAlignment = Alignment.CenterVertically,
+      ) {
+        Text(
+            "Scanned Basket",
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+        if (uiState.basket.isNotEmpty()) {
+          TextButton(onClick = { viewModel.clearBasket() }) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+              Icon(
+                  imageVector = Icons.Default.Delete,
+                  contentDescription = "Clear all",
+                  tint = MaterialTheme.colorScheme.error,
+                  modifier = Modifier.size(18.dp),
+              )
+              Text(
+                  "Clear all",
+                  color = MaterialTheme.colorScheme.error,
+                  fontWeight = FontWeight.Bold,
+              )
             }
           }
         }
       }
 
       // Basket Items
-      items(uiState.basket, key = { it.product.id }) { item ->
-        OrderItemRow(
-            item = item,
-            onIncrease = { viewModel.onIncreaseQty(item.product.id.toString()) },
-            onDecrease = { viewModel.onDecreaseQty(item.product.id.toString()) },
-            onRemove = { viewModel.onRemoveItem(item.product.id.toString()) },
-        )
-      }
-
-      // Total Section
-      item {
-        Spacer(modifier = Modifier.height(8.dp))
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.Bottom,
-        ) {
-          Text(
-              "Total Balance",
-              style = MaterialTheme.typography.bodyLarge,
-              color = MaterialTheme.colorScheme.outline,
-              modifier = Modifier.padding(bottom = 4.dp),
-          )
-          Text(
-              "₡${uiState.totalAmount}",
-              style = MaterialTheme.typography.headlineLarge,
-              fontWeight = FontWeight.Bold,
-              color = MaterialTheme.colorScheme.onSurface,
-              fontSize = 36.sp,
+      LazyColumn(
+          modifier = Modifier.weight(1f).fillMaxWidth(),
+          verticalArrangement = Arrangement.spacedBy(12.dp),
+          contentPadding = PaddingValues(bottom = 8.dp),
+      ) {
+        items(uiState.basket, key = { it.product.id }) { item ->
+          OrderItemRow(
+              item = item,
+              onIncrease = { viewModel.onIncreaseQty(item.product.id.toString()) },
+              onDecrease = { viewModel.onDecreaseQty(item.product.id.toString()) },
+              onRemove = { viewModel.onRemoveItem(item.product.id.toString()) },
           )
         }
       }
 
+      // Total Section
+      Row(
+          modifier = Modifier.fillMaxWidth(),
+          horizontalArrangement = Arrangement.SpaceBetween,
+          verticalAlignment = Alignment.Bottom,
+      ) {
+        Text(
+            "Total Balance",
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.outline,
+            modifier = Modifier.padding(bottom = 4.dp),
+        )
+        Text(
+            "₡${uiState.totalAmount}",
+            style = MaterialTheme.typography.headlineLarge,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface,
+            fontSize = 36.sp,
+        )
+      }
+
       // Purchase / Charge Button
-      item {
-        Spacer(modifier = Modifier.height(8.dp))
-        Button(
-            onClick = {
-              viewModel.checkout()
-              onNavigateToDashboard()
-            },
-            modifier = Modifier.fillMaxWidth().height(56.dp),
-            shape = MaterialTheme.shapes.large,
-            enabled = uiState.basket.isNotEmpty(),
-            colors =
-                ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary,
-                ),
+      Button(
+          onClick = {
+            viewModel.checkout()
+            onNavigateToDashboard()
+          },
+          modifier = Modifier.fillMaxWidth().height(56.dp),
+          shape = MaterialTheme.shapes.large,
+          enabled = uiState.basket.isNotEmpty(),
+          colors =
+              ButtonDefaults.buttonColors(
+                  containerColor = MaterialTheme.colorScheme.primary,
+                  contentColor = MaterialTheme.colorScheme.onPrimary,
+              ),
+      ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-          Row(
-              verticalAlignment = Alignment.CenterVertically,
-              horizontalArrangement = Arrangement.spacedBy(8.dp),
-          ) {
-            Icon(Icons.Default.ShoppingCart, contentDescription = "Purchase")
-            Text(
-                text =
-                    if (uiState.basket.isNotEmpty()) "Charge ₡${uiState.totalAmount}"
-                    else "Basket is empty",
-                fontWeight = FontWeight.Bold,
-                fontSize = 16.sp,
-            )
-          }
+          Icon(Icons.Default.ShoppingCart, contentDescription = "Purchase")
+          Text(
+              text =
+                  if (uiState.basket.isNotEmpty()) "Charge ₡${uiState.totalAmount}"
+                  else "Basket is empty",
+              fontWeight = FontWeight.Bold,
+              fontSize = 16.sp,
+          )
         }
       }
     }
