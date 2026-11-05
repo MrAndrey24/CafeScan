@@ -17,6 +17,8 @@ interface IProductLocalDataSource {
 
   suspend fun getProductById(id: Long): Product?
 
+  suspend fun getProductByStock(id: Long): Boolean
+
   suspend fun getProductByName(name: String): Boolean
 
   suspend fun deleteProduct(id: Long)

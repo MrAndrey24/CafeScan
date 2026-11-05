@@ -26,6 +26,10 @@ class ProductRepository(private val localProductDataSource: IProductLocalDataSou
     return localProductDataSource.getProductById(id)
   }
 
+  override suspend fun retrieveProductByStock(id: Long): Boolean {
+    return localProductDataSource.getProductByStock(id)
+  }
+
   override suspend fun isNameExists(name: String): Boolean {
     return localProductDataSource.getProductByName(name)
   }

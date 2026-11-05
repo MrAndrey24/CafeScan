@@ -34,7 +34,7 @@ fun QrPreviewCard(onScan: (String) -> Unit, modifier: Modifier = Modifier) {
   var lastScannedTime by remember { mutableStateOf(0L) }
 
   Card(
-      modifier = modifier.fillMaxWidth().height(320.dp),
+      modifier = modifier.fillMaxWidth().height(180.dp),
       shape = RoundedCornerShape(24.dp),
       elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
   ) {
