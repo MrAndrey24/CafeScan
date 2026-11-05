@@ -61,12 +61,7 @@ fun SalesSummaryScreen(
     viewModel: SaleViewModel,
 ) {
   val uiState by viewModel.uiState.collectAsState()
-  val filterOptions = listOf(
-      1 to "Today",
-      7 to "7 Days",
-      30 to "30 Days",
-      365 to "All Time"
-  )
+  val filterOptions = listOf(1 to "Today", 7 to "7 Days", 30 to "30 Days", 365 to "All Time")
 
   Scaffold(
       topBar = {
@@ -94,10 +89,7 @@ fun SalesSummaryScreen(
       containerColor = MaterialTheme.colorScheme.background,
   ) { padding ->
     if (uiState.isLoading) {
-      Box(
-          modifier = Modifier.fillMaxSize().padding(padding),
-          contentAlignment = Alignment.Center
-      ) {
+      Box(modifier = Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
         CircularProgressIndicator()
       }
       return@Scaffold
@@ -118,15 +110,19 @@ fun SalesSummaryScreen(
             val isSelected = uiState.selectedFilterDays == days
             Surface(
                 shape = RoundedCornerShape(20.dp),
-                color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
-                modifier = Modifier.clickable { viewModel.onFilterChanged(days) }
+                color =
+                    if (isSelected) MaterialTheme.colorScheme.primary
+                    else MaterialTheme.colorScheme.surfaceVariant,
+                modifier = Modifier.clickable { viewModel.onFilterChanged(days) },
             ) {
               Text(
                   text = label,
                   style = MaterialTheme.typography.labelMedium,
                   fontWeight = FontWeight.Bold,
-                  color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
-                  modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                  color =
+                      if (isSelected) MaterialTheme.colorScheme.onPrimary
+                      else MaterialTheme.colorScheme.onSurfaceVariant,
+                  modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
               )
             }
           }
@@ -140,13 +136,13 @@ fun SalesSummaryScreen(
             MetricCard(
                 label = "Total Revenue",
                 value = "₡${uiState.totalChargedToday}",
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
             )
             MetricCard(
                 label = "Total Profit",
                 value = "+₡${uiState.totalProfitToday}",
                 valueColor = MaterialTheme.colorScheme.tertiary,
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
             )
           }
           Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -154,13 +150,13 @@ fun SalesSummaryScreen(
                 label = "Sales Count",
                 value = "${uiState.todaySales.size}",
                 icon = Icons.AutoMirrored.Filled.TrendingUp,
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
             )
             MetricCard(
                 label = "Items Sold",
                 value = "${uiState.totalItemsToday}",
                 icon = Icons.Default.Inventory,
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f),
             )
           }
         }
@@ -181,12 +177,12 @@ fun SalesSummaryScreen(
         item {
           Box(
               modifier = Modifier.fillMaxWidth().padding(24.dp),
-              contentAlignment = Alignment.Center
+              contentAlignment = Alignment.Center,
           ) {
             Text(
                 "No product sales registered for this period.",
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.outline
+                color = MaterialTheme.colorScheme.outline,
             )
           }
         }
@@ -201,12 +197,13 @@ fun SalesSummaryScreen(
 
 @Composable
 fun TopProductRowItem(rank: Int, product: TopProduct) {
-  val badgeText = when (rank) {
-    1 -> "🥇"
-    2 -> "🥈"
-    3 -> "🥉"
-    else -> "#$rank"
-  }
+  val badgeText =
+      when (rank) {
+        1 -> "🥇"
+        2 -> "🥈"
+        3 -> "🥉"
+        else -> "#$rank"
+      }
 
   Card(
       modifier = Modifier.fillMaxWidth(),
@@ -224,11 +221,9 @@ fun TopProductRowItem(rank: Int, product: TopProduct) {
           verticalAlignment = Alignment.CenterVertically,
       ) {
         Box(
-            modifier = Modifier.size(44.dp)
-                .background(
-                    MaterialTheme.colorScheme.surfaceVariant,
-                    CircleShape
-                ),
+            modifier =
+                Modifier.size(44.dp)
+                    .background(MaterialTheme.colorScheme.surfaceVariant, CircleShape),
             contentAlignment = Alignment.Center,
         ) {
           Text(badgeText, fontSize = 20.sp)

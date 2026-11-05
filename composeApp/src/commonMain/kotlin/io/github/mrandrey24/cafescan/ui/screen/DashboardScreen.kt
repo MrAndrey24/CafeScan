@@ -75,13 +75,17 @@ fun DashboardScreen(
   val scannerUiState by scannerViewModel.uiState.collectAsState()
   val lastSale = scannerUiState.lastSale
 
-  LaunchedEffect(Unit) {
-    saleViewModel.loadTodaySales()
-  }
+  LaunchedEffect(Unit) { saleViewModel.loadTodaySales() }
 
-  val displayTotalCharged = if (saleUiState.todaySales.isNotEmpty()) saleUiState.totalChargedToday else (lastSale?.totalCharged ?: 0.0)
-  val displayEstProfit = if (saleUiState.todaySales.isNotEmpty()) saleUiState.totalProfitToday else (lastSale?.estProfit ?: 0.0)
-  val displayItems = if (saleUiState.todaySales.isNotEmpty()) saleUiState.totalItemsToday else (lastSale?.items?.sumOf { it.quantity } ?: 0)
+  val displayTotalCharged =
+      if (saleUiState.todaySales.isNotEmpty()) saleUiState.totalChargedToday
+      else (lastSale?.totalCharged ?: 0.0)
+  val displayEstProfit =
+      if (saleUiState.todaySales.isNotEmpty()) saleUiState.totalProfitToday
+      else (lastSale?.estProfit ?: 0.0)
+  val displayItems =
+      if (saleUiState.todaySales.isNotEmpty()) saleUiState.totalItemsToday
+      else (lastSale?.items?.sumOf { it.quantity } ?: 0)
 
   Scaffold(
       topBar = {
@@ -261,13 +265,14 @@ fun DashboardScreen(
       }
 
       // Detail List
-      val recentSaleItems = if (saleUiState.todaySales.isNotEmpty()) {
-        saleUiState.todaySales.flatMap { it.items }
-      } else if (lastSale != null) {
-        lastSale.items
-      } else {
-        emptyList()
-      }
+      val recentSaleItems =
+          if (saleUiState.todaySales.isNotEmpty()) {
+            saleUiState.todaySales.flatMap { it.items }
+          } else if (lastSale != null) {
+            lastSale.items
+          } else {
+            emptyList()
+          }
 
       if (recentSaleItems.isNotEmpty()) {
         items(recentSaleItems) { item -> OrderItemDetailRow(item) }
