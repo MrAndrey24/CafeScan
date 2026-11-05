@@ -79,6 +79,8 @@ fun HomeScreen(
           snackBarHostState.showSnackbar("QR inválido — no es un producto de CaféScan")
       is ScanError.ProductNotFound ->
           snackBarHostState.showSnackbar("Producto no encontrado en el catálogo")
+
+      is ScanError.OutOfStock -> snackBarHostState.showSnackbar("Producto sin stock disponible")
       null -> Unit
     }
     viewModel.clearScanError()

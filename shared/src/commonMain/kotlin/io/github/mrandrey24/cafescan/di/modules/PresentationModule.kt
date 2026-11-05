@@ -19,7 +19,7 @@ import org.koin.dsl.module
 val presentationModule = module {
   viewModel { ProductViewModel(get(), get()) }
   viewModel { QrViewModel(get()) }
-  viewModel { ScannerViewModel(get(), get()) }
+  viewModel { ScannerViewModel(get(), get(), get()) }
   viewModel { InventoryViewModel(get(), get(), get()) }
   viewModel { SaleViewModel(get()) }
 }

@@ -13,6 +13,7 @@ import androidx.lifecycle.viewModelScope
 import io.github.mrandrey24.cafescan.domain.entities.OrderItem
 import io.github.mrandrey24.cafescan.domain.entities.QrPayload
 import io.github.mrandrey24.cafescan.domain.usecases.sale.SaveSaleUseCase
+import io.github.mrandrey24.cafescan.domain.usecases.scanner.CheckProductAvailabilityUseCase
 import io.github.mrandrey24.cafescan.domain.usecases.scanner.GetProductByIdUseCase
 import io.github.mrandrey24.cafescan.presentation.state.LastSale
 import io.github.mrandrey24.cafescan.presentation.state.ScanError
@@ -25,6 +26,7 @@ import kotlinx.coroutines.launch
 
 class ScannerViewModel(
     private val getProductByIdUseCase: GetProductByIdUseCase,
+    private val checkProductAvailabilityUseCase: CheckProductAvailabilityUseCase,
     private val saveSaleUseCase: SaveSaleUseCase,
 ) : ViewModel() {
   private val _uiState = MutableStateFlow(ScannerUiState())
@@ -54,6 +56,13 @@ class ScannerViewModel(
 
         if (product == null) {
           _uiState.update { it.copy(scanError = ScanError.ProductNotFound) }
+          return@launch
+        }
+
+        val existStock = checkProductAvailabilityUseCase(product.id)
+
+        if (!existStock) {
+          _uiState.update { it.copy(scanError = ScanError.OutOfStock) }
           return@launch
         }
 

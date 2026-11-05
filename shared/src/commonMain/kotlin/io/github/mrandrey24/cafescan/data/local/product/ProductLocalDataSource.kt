@@ -80,6 +80,10 @@ class ProductLocalDataSource(database: AppDatabase) : IProductLocalDataSource {
     return dbQuery.selectProductById(id, ::mapProductSelecting).executeAsOneOrNull()
   }
 
+  override suspend fun getProductByStock(id: Long): Boolean {
+    return dbQuery.findProductByStock(id).executeAsOne()
+  }
+
   override suspend fun getProductByName(name: String): Boolean {
     return dbQuery.findProductByName(name).executeAsOne()
   }

@@ -17,6 +17,8 @@ interface IProductRepository {
 
   suspend fun retrieveProductById(id: Long): Product?
 
+  suspend fun retrieveProductByStock(id: Long): Boolean
+
   suspend fun isNameExists(name: String): Boolean
 
   suspend fun deleteProduct(id: Long)

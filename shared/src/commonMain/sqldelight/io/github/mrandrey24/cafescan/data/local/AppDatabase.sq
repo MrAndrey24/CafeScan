@@ -83,6 +83,12 @@ lastInsertRowId:
 SELECT last_insert_rowid();
 
 
+findProductByStock:
+SELECT COUNT(*) > 0
+FROM Products p
+LEFT JOIN Stocks s ON s.product_id = p.id
+WHERE p.id = :product_id AND s.current_qty > 0;
+
 -- STOCK QUERIES
 insertOrIgnoreStock:
 INSERT OR IGNORE INTO Stocks(product_id, current_qty, initial_qty, low_stock_threshold, updated_at)

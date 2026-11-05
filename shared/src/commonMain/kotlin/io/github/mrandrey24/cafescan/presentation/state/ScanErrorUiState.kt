@@ -12,4 +12,6 @@ sealed class ScanError {
   object InvalidFormat : ScanError()
 
   object ProductNotFound : ScanError()
+
+  object OutOfStock : ScanError()
 }
