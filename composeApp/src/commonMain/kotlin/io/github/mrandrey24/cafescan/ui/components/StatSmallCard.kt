@@ -1,3 +1,11 @@
+/**
+ * Copyright (c) 2026 Andrey Acosta Ramirez
+ * All Rights Reserved.
+ *
+ * This software is confidential and proprietary. Unauthorized copying,
+ * distribution, or modification of this file is strictly prohibited.
+ *
+ */
 package io.github.mrandrey24.cafescan.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
@@ -22,27 +30,27 @@ fun StatSmallCard(
     valueColor: Color = Color.Black,
     modifier: Modifier = Modifier,
 ) {
-    Card(
-        modifier = modifier.height(80.dp),
-        shape = MaterialTheme.shapes.large,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+  Card(
+      modifier = modifier.height(80.dp),
+      shape = MaterialTheme.shapes.large,
+      colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+  ) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
     ) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-        ) {
-            Text(
-                label,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.outline,
-            )
-            Text(
-                value,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = valueColor,
-            )
-        }
+      Text(
+          label,
+          style = MaterialTheme.typography.labelSmall,
+          color = MaterialTheme.colorScheme.outline,
+      )
+      Text(
+          value,
+          style = MaterialTheme.typography.titleMedium,
+          fontWeight = FontWeight.Bold,
+          color = valueColor,
+      )
     }
+  }
 }
