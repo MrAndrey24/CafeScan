@@ -24,7 +24,7 @@ class SaleViewModel(
   val uiState = _uiState.asStateFlow()
 
   init {
-    loadSalesSummary(7)
+    loadTodaySales()
   }
 
   fun onFilterChanged(days: Int) {
@@ -55,6 +55,6 @@ class SaleViewModel(
   }
 
   fun loadTodaySales() {
-    loadSalesSummary(_uiState.value.selectedFilterDays)
+    loadSalesSummary(1)
   }
 }
