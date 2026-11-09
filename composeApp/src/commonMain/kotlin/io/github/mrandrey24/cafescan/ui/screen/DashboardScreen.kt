@@ -59,6 +59,9 @@ import io.github.mrandrey24.cafescan.domain.entities.OrderItem
 import io.github.mrandrey24.cafescan.presentation.SaleViewModel
 import io.github.mrandrey24.cafescan.presentation.ScannerViewModel
 import io.github.mrandrey24.cafescan.ui.components.MetricCard
+import kotlin.time.Instant
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -77,15 +80,9 @@ fun DashboardScreen(
 
   LaunchedEffect(Unit) { saleViewModel.loadTodaySales() }
 
-  val displayTotalCharged =
-      if (saleUiState.todaySales.isNotEmpty()) saleUiState.totalChargedToday
-      else (lastSale?.totalCharged ?: 0.0)
-  val displayEstProfit =
-      if (saleUiState.todaySales.isNotEmpty()) saleUiState.totalProfitToday
-      else (lastSale?.estProfit ?: 0.0)
-  val displayItems =
-      if (saleUiState.todaySales.isNotEmpty()) saleUiState.totalItemsToday
-      else (lastSale?.items?.sumOf { it.quantity } ?: 0)
+  val displayTotalCharged = saleUiState.totalChargedToday
+  val displayEstProfit = saleUiState.totalProfitToday
+  val displayItems = saleUiState.totalItemsToday
 
   Scaffold(
       topBar = {
@@ -265,10 +262,7 @@ fun DashboardScreen(
       }
 
       // Detail List
-      val recentSaleItems =
-          if (saleUiState.todaySales.isNotEmpty()) {
-            saleUiState.todaySales.flatMap { it.items }
-          } else lastSale?.items ?: emptyList()
+      val recentSaleItems = saleUiState.todaySales.flatMap { it.items }
 
       if (recentSaleItems.isNotEmpty()) {
         items(recentSaleItems) { item -> OrderItemDetailRow(item) }
@@ -289,7 +283,12 @@ fun DashboardScreen(
       }
 
       // Status Banner
-      if (lastSale != null) {
+      val displayUpdateTimestamp =
+          if (saleUiState.todaySales.isNotEmpty()) {
+            formatTime(saleUiState.todaySales.first().timestamp)
+          } else lastSale?.timestamp
+
+      if (!displayUpdateTimestamp.isNullOrBlank()) {
         item {
           Surface(
               modifier = Modifier.fillMaxWidth(),
@@ -318,7 +317,7 @@ fun DashboardScreen(
                 )
               }
               Text(
-                  lastSale.timestamp,
+                  displayUpdateTimestamp,
                   style = MaterialTheme.typography.bodySmall,
                   color = MaterialTheme.colorScheme.outline,
               )
@@ -328,6 +327,24 @@ fun DashboardScreen(
       }
     }
   }
+}
+
+private fun formatTime(epochMs: Long): String {
+  if (epochMs <= 0L) return ""
+  val timeZone = TimeZone.currentSystemDefault()
+  val instant = Instant.fromEpochMilliseconds(epochMs)
+  val localTime = instant.toLocalDateTime(timeZone).time
+  val hour24 = localTime.hour
+  val minute = localTime.minute
+  val isPm = hour24 >= 12
+  val hour12 =
+      when (val h = hour24 % 12) {
+        0 -> 12
+        else -> h
+      }
+  val minStr = if (minute < 10) "0$minute" else "$minute"
+  val amPm = if (isPm) "PM" else "AM"
+  return "$hour12:$minStr $amPm"
 }
 
 @Composable
