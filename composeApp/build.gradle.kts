@@ -58,6 +58,7 @@ kotlin {
       implementation(libs.camerak.qr.scanner)
       // Serialization
       implementation(libs.kotlinx.serialization.json)
+      implementation(libs.kotlinx.datetime)
       // Navigation
       implementation(libs.compose.navigation)
     }
