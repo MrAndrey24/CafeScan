@@ -201,7 +201,7 @@ fun DashboardScreen(
           Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             MetricCard(
                 label = "Items",
-                value = "${displayItems}",
+                value = "$displayItems",
                 icon = Icons.Default.Inventory,
                 modifier = Modifier.weight(1f),
             )
@@ -268,11 +268,7 @@ fun DashboardScreen(
       val recentSaleItems =
           if (saleUiState.todaySales.isNotEmpty()) {
             saleUiState.todaySales.flatMap { it.items }
-          } else if (lastSale != null) {
-            lastSale.items
-          } else {
-            emptyList()
-          }
+          } else lastSale?.items ?: emptyList()
 
       if (recentSaleItems.isNotEmpty()) {
         items(recentSaleItems) { item -> OrderItemDetailRow(item) }
