@@ -1,0 +1,285 @@
+/**
+ * Copyright (c) 2026 Andrey Acosta Ramirez
+ * All Rights Reserved.
+ *
+ * This software is confidential and proprietary. Unauthorized copying,
+ * distribution, or modification of this file is strictly prohibited.
+ *
+ */
+package io.github.mrandrey24.cafescan.ui.screen
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Inventory
+import androidx.compose.material.icons.filled.LocalOffer
+import androidx.compose.material.icons.filled.QrCodeScanner
+import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import io.github.mrandrey24.cafescan.presentation.ScannerViewModel
+import io.github.mrandrey24.cafescan.presentation.state.ScanError
+import io.github.mrandrey24.cafescan.ui.components.OrderItemRow
+import io.github.mrandrey24.cafescan.ui.components.QrPreviewCard
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun HomeScreen(
+    onNavigateToDashboard: () -> Unit,
+    onNavigateToInventory: () -> Unit,
+    onNavigateToCatalog: () -> Unit,
+    //    onNavigateToScanner: () -> Unit,
+    viewModel: ScannerViewModel,
+) {
+  val uiState by viewModel.uiState.collectAsState()
+  val snackBarHostState = remember { SnackbarHostState() }
+
+  LaunchedEffect(uiState.scanError) {
+    when (uiState.scanError) {
+      is ScanError.InvalidFormat ->
+          snackBarHostState.showSnackbar("QR inválido — no es un producto de CaféScan")
+      is ScanError.ProductNotFound ->
+          snackBarHostState.showSnackbar("Producto no encontrado en el catálogo")
+
+      is ScanError.OutOfStock -> snackBarHostState.showSnackbar("Producto sin stock disponible")
+      null -> Unit
+    }
+    viewModel.clearScanError()
+  }
+
+  Scaffold(
+      snackbarHost = { SnackbarHost(snackBarHostState) },
+      topBar = {
+        CenterAlignedTopAppBar(
+            title = {
+              Text(
+                  "CaféScan",
+                  style = MaterialTheme.typography.headlineSmall,
+                  fontWeight = FontWeight.Bold,
+                  color = MaterialTheme.colorScheme.onSurface,
+              )
+            },
+            actions = {
+              // Items Badge
+              Surface(
+                  color = MaterialTheme.colorScheme.surfaceVariant,
+                  shape = RoundedCornerShape(12.dp),
+                  modifier = Modifier.padding(end = 16.dp),
+              ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                  Box(
+                      modifier =
+                          Modifier.size(8.dp)
+                              .background(MaterialTheme.colorScheme.primary, CircleShape)
+                  )
+                  Text(
+                      "${uiState.totalItems} items",
+                      style = MaterialTheme.typography.labelMedium,
+                      fontWeight = FontWeight.SemiBold,
+                      color = MaterialTheme.colorScheme.onSurfaceVariant,
+                  )
+                }
+              }
+            },
+            colors =
+                TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.background
+                ),
+        )
+      },
+      bottomBar = {
+        NavigationBar(
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            tonalElevation = 8.dp,
+        ) {
+          NavigationBarItem(
+              selected = true,
+              onClick = { /* Already here */ },
+              icon = { Icon(Icons.Default.QrCodeScanner, contentDescription = "Scanner") },
+              label = { Text("Scanner") },
+              colors =
+                  NavigationBarItemDefaults.colors(
+                      selectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                      selectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                      indicatorColor = MaterialTheme.colorScheme.surfaceVariant,
+                  ),
+          )
+          NavigationBarItem(
+              selected = false,
+              onClick = onNavigateToDashboard,
+              icon = { Icon(Icons.Default.History, contentDescription = "Today") },
+              label = { Text("Today") },
+          )
+          NavigationBarItem(
+              selected = false,
+              onClick = onNavigateToInventory,
+              icon = { Icon(Icons.Default.Inventory, contentDescription = "Stock") },
+              label = { Text("Stock") },
+          )
+          NavigationBarItem(
+              selected = false,
+              onClick = onNavigateToCatalog,
+              icon = { Icon(Icons.Default.LocalOffer, contentDescription = "Catalog") },
+              label = { Text("Catalog") },
+          )
+        }
+      },
+      containerColor = MaterialTheme.colorScheme.background,
+  ) { padding ->
+    Column(
+        modifier = Modifier.fillMaxSize().padding(padding).padding(horizontal = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+      // Scanner Section
+      QrPreviewCard(
+          onScan = { rawString -> viewModel.onQrScanned(rawString) },
+          modifier = Modifier.padding(top = 8.dp),
+      )
+
+      // Basket Header
+      Row(
+          modifier = Modifier.fillMaxWidth(),
+          horizontalArrangement = Arrangement.SpaceBetween,
+          verticalAlignment = Alignment.CenterVertically,
+      ) {
+        Text(
+            "Scanned Basket",
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+        if (uiState.basket.isNotEmpty()) {
+          TextButton(onClick = { viewModel.clearBasket() }) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
+              Icon(
+                  imageVector = Icons.Default.Delete,
+                  contentDescription = "Clear all",
+                  tint = MaterialTheme.colorScheme.error,
+                  modifier = Modifier.size(18.dp),
+              )
+              Text(
+                  "Clear all",
+                  color = MaterialTheme.colorScheme.error,
+                  fontWeight = FontWeight.Bold,
+              )
+            }
+          }
+        }
+      }
+
+      // Basket Items
+      LazyColumn(
+          modifier = Modifier.weight(1f).fillMaxWidth(),
+          verticalArrangement = Arrangement.spacedBy(12.dp),
+          contentPadding = PaddingValues(bottom = 8.dp),
+      ) {
+        items(uiState.basket, key = { it.product.id }) { item ->
+          OrderItemRow(
+              item = item,
+              onIncrease = { viewModel.onIncreaseQty(item.product.id.toString()) },
+              onDecrease = { viewModel.onDecreaseQty(item.product.id.toString()) },
+              onRemove = { viewModel.onRemoveItem(item.product.id.toString()) },
+          )
+        }
+      }
+
+      // Total Section
+      Row(
+          modifier = Modifier.fillMaxWidth(),
+          horizontalArrangement = Arrangement.SpaceBetween,
+          verticalAlignment = Alignment.Bottom,
+      ) {
+        Text(
+            "Total Balance",
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.outline,
+            modifier = Modifier.padding(bottom = 4.dp),
+        )
+        Text(
+            "₡${uiState.totalAmount}",
+            style = MaterialTheme.typography.headlineLarge,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface,
+            fontSize = 36.sp,
+        )
+      }
+
+      // Purchase / Charge Button
+      Button(
+          onClick = {
+            viewModel.checkout()
+            onNavigateToDashboard()
+          },
+          modifier = Modifier.fillMaxWidth().height(56.dp),
+          shape = MaterialTheme.shapes.large,
+          enabled = uiState.basket.isNotEmpty(),
+          colors =
+              ButtonDefaults.buttonColors(
+                  containerColor = MaterialTheme.colorScheme.primary,
+                  contentColor = MaterialTheme.colorScheme.onPrimary,
+              ),
+      ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+          Icon(Icons.Default.ShoppingCart, contentDescription = "Purchase")
+          Text(
+              text =
+                  if (uiState.basket.isNotEmpty()) "Charge ₡${uiState.totalAmount}"
+                  else "Basket is empty",
+              fontWeight = FontWeight.Bold,
+              fontSize = 16.sp,
+          )
+        }
+      }
+    }
+  }
+}

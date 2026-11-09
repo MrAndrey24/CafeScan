@@ -1,0 +1,31 @@
+/**
+ * Copyright (c) 2026 Andrey Acosta Ramirez
+ * All Rights Reserved.
+ *
+ * This software is confidential and proprietary. Unauthorized copying,
+ * distribution, or modification of this file is strictly prohibited.
+ *
+ */
+package io.github.mrandrey24.cafescan
+
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.tooling.preview.Preview
+
+class MainActivity : ComponentActivity() {
+  override fun onCreate(savedInstanceState: Bundle?) {
+    enableEdgeToEdge()
+    super.onCreate(savedInstanceState)
+
+    setContent { App() }
+  }
+}
+
+@Preview
+@Composable
+fun AppAndroidPreview() {
+  App()
+}

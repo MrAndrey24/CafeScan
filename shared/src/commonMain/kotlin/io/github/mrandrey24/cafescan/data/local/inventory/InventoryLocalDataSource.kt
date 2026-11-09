@@ -1,0 +1,126 @@
+/**
+ * Copyright (c) 2026 Andrey Acosta Ramirez
+ * All Rights Reserved.
+ *
+ * This software is confidential and proprietary. Unauthorized copying,
+ * distribution, or modification of this file is strictly prohibited.
+ *
+ */
+package io.github.mrandrey24.cafescan.data.local.inventory
+
+import io.github.mrandrey24.cafescan.data.local.AppDatabase
+import io.github.mrandrey24.cafescan.domain.entities.Product
+import io.github.mrandrey24.cafescan.domain.entities.QrPayload
+import io.github.mrandrey24.cafescan.domain.entities.StockItem
+import kotlin.time.Clock
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
+import kotlinx.coroutines.withContext
+
+class InventoryLocalDataSource(
+    database: AppDatabase,
+    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
+) : IInventoryLocalDataSource {
+  private val dbQuery = database.appDatabaseQueries
+
+  override suspend fun getAllActiveWithStock(): List<StockItem> =
+      withContext(ioDispatcher) {
+        dbQuery
+            .getAllActiveWithStock {
+                id,
+                name,
+                price,
+                cost,
+                emoji,
+                qrString,
+                isActive,
+                currentQty,
+                initialQty,
+                lowStockThreshold,
+                stockUpdatedAt ->
+              val product =
+                  Product(
+                      id = id,
+                      name = name,
+                      price = price,
+                      cost = cost,
+                      emoji = emoji,
+                      qrString = qrString,
+                      isActive = isActive == 1L,
+                  )
+              StockItem(
+                  product = product,
+                  currentQty = (currentQty ?: 0L).toInt(),
+                  initialQty = (initialQty ?: 0L).toInt(),
+                  lowStockThreshold = (lowStockThreshold ?: 3L).toInt(),
+              )
+            }
+            .executeAsList()
+      }
+
+  override suspend fun updateStockAndPrice(
+      productId: Long,
+      currentQty: Int,
+      price: Double,
+  ): Unit =
+      withContext(ioDispatcher) {
+        dbQuery.transaction {
+          val now = Clock.System.now().toEpochMilliseconds()
+          dbQuery.insertOrIgnoreStock(
+              product_id = productId,
+              current_qty = currentQty.toLong(),
+              initial_qty = currentQty.toLong(),
+              low_stock_threshold = 3L,
+              updated_at = now,
+          )
+          dbQuery.updateStockQty(
+              currentQty = currentQty.toLong(),
+              updatedAt = now,
+              productId = productId,
+          )
+          val product =
+              dbQuery.selectProductById(productId, ::mapProductSelecting).executeAsOneOrNull()
+          if (product != null) {
+            val qrPayload =
+                QrPayload(
+                    id = productId.toString(),
+                    name = product.name,
+                    price = price.toString(),
+                    cost = product.cost.toString(),
+                )
+            val qr = qrPayload.toQrString()
+            dbQuery.updateProductPriceAndQr(
+                price = price,
+                qrString = qr,
+                updatedAt = now,
+                id = productId,
+            )
+          }
+        }
+      }
+
+  private fun mapProductSelecting(
+      id: Long,
+      name: String,
+      price: Double,
+      cost: Double,
+      emoji: String,
+      isActive: Long,
+      qrString: String,
+      createdAt: Long,
+      updatedAt: Long,
+  ): Product {
+    return Product(
+        id = id,
+        name = name,
+        price = price,
+        cost = cost,
+        emoji = emoji,
+        qrString = qrString,
+        isActive = isActive == 1L,
+        createdAt = createdAt,
+        updatedAt = updatedAt,
+    )
+  }
+}

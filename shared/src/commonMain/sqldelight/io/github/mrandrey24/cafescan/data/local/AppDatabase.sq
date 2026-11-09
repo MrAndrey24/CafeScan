@@ -1,0 +1,177 @@
+CREATE TABLE Products (
+    id INTEGER NOT NULL PRIMARY KEY,
+    name TEXT NOT NULL UNIQUE,
+    price REAL NOT NULL,
+    cost REAL NOT NULL,
+    emoji TEXT NOT NULL DEFAULT '=',
+    is_active INTEGER NOT NULL DEFAULT 1,
+    qr_string  TEXT NOT NULL,
+    created_at INTEGER NOT NULL,
+    updated_at INTEGER NOT NULL
+);
+
+CREATE TABLE Stocks (
+    product_id INTEGER NOT NULL PRIMARY KEY REFERENCES Products(id) ON DELETE CASCADE,
+    current_qty INTEGER NOT NULL DEFAULT 0,
+    initial_qty INTEGER NOT NULL DEFAULT 0,
+    low_stock_threshold INTEGER NOT NULL DEFAULT 3,
+    updated_at INTEGER NOT NULL
+);
+
+CREATE TABLE Sales (
+    id INTEGER NOT NULL PRIMARY KEY,
+    timestamp INTEGER NOT NULL,
+    total REAL NOT NULL,
+    profit REAL NOT NULL
+);
+
+CREATE TABLE SaleItems (
+    id         INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    sale_id    INTEGER    NOT NULL REFERENCES Sales(id)    ON DELETE CASCADE,
+    product_id INTEGER    NOT NULL REFERENCES Products(id) ON DELETE RESTRICT,
+    quantity   INTEGER NOT NULL,
+    unit_price REAL    NOT NULL,
+    unit_cost  REAL    NOT NULL,
+    subtotal   REAL    NOT NULL
+);
+
+-- PRODUCT QUERIES
+CREATE UNIQUE INDEX idx_products_active_name
+ON Products(LOWER(name)) WHERE is_active = 1;
+
+insertProduct:
+INSERT INTO Products(id, name, price, cost, emoji, qr_string, is_active, created_at, updated_at)
+VALUES (:id, :name, :price, :cost, :emoji, :qr_string, :is_active, :created_at, :updated_at);
+
+updateProduct:
+UPDATE Products
+SET name       = :name,
+    price      = :price,
+    cost       = :cost,
+    emoji      = :emoji,
+    qr_string  = :qrString,
+    is_active  = :isActive,
+    updated_at = :updatedAt
+WHERE id = :id;
+
+updateProductPriceAndQr:
+UPDATE Products
+SET price      = :price,
+    qr_string  = :qrString,
+    updated_at = :updatedAt
+WHERE id = :id;
+
+deleteProduct:
+DELETE FROM Products
+WHERE id = :id;
+
+selectAllProducts:
+SELECT * FROM Products;
+
+selectProductById:
+SELECT *
+FROM Products
+WHERE id = :id;
+
+findProductByName:
+SELECT COUNT(*) > 0
+FROM Products
+WHERE LOWER(name) = LOWER(:name)  -- case insensitive
+AND is_active = 1;
+
+lastInsertRowId:
+SELECT last_insert_rowid();
+
+
+findProductByStock:
+SELECT COUNT(*) > 0
+FROM Products p
+LEFT JOIN Stocks s ON s.product_id = p.id
+WHERE p.id = :product_id AND s.current_qty > 0;
+
+-- STOCK QUERIES
+insertOrIgnoreStock:
+INSERT OR IGNORE INTO Stocks(product_id, current_qty, initial_qty, low_stock_threshold, updated_at)
+VALUES (:product_id, :current_qty, :initial_qty, :low_stock_threshold, :updated_at);
+
+getAllActiveWithStock:
+SELECT
+    p.id,
+    p.name,
+    p.price,
+    p.cost,
+    p.emoji,
+    p.qr_string,
+    p.is_active,
+    s.current_qty,
+    s.initial_qty,
+    s.low_stock_threshold,
+    s.updated_at AS stock_updated_at
+FROM Products p
+LEFT JOIN Stocks s ON s.product_id = p.id
+WHERE p.is_active = 1
+ORDER BY p.name ASC;
+
+decrementStock:
+UPDATE Stocks
+SET current_qty = MAX(0, current_qty - :qty),
+    updated_at  = :updatedAt
+WHERE product_id = :productId;
+
+updateStockQty:
+UPDATE Stocks
+SET current_qty = :currentQty,
+    initial_qty = CASE WHEN :currentQty > initial_qty THEN :currentQty ELSE initial_qty END,
+    updated_at  = :updatedAt
+WHERE product_id = :productId;
+
+
+
+
+-- SALES QUERIES
+insertSale:
+INSERT INTO Sales(id, timestamp, total, profit)
+VALUES (:id, :timestamp, :total, :profit);
+
+insertSaleItem:
+INSERT INTO SaleItems(sale_id, product_id, quantity, unit_price, unit_cost, subtotal)
+VALUES (:saleId, :productId, :quantity, :unitPrice, :unitCost, :subtotal);
+
+getSalesByDateRange:
+SELECT id, timestamp, total, profit
+FROM Sales
+WHERE timestamp >= :startMs AND timestamp < :endMs
+ORDER BY timestamp DESC;
+
+-- Retrieve the items from a sale along with product details
+getSaleItemsBySaleId:
+SELECT
+    si.id,
+    si.quantity,
+    si.unit_price,
+    si.unit_cost,
+    si.subtotal,
+    p.id         AS product_id,
+    p.name       AS product_name,
+    p.emoji      AS product_emoji,
+    p.qr_string  AS product_qr_string,
+    p.is_active  AS product_is_active
+FROM SaleItems si
+INNER JOIN Products p ON p.id = si.product_id
+WHERE si.sale_id = :saleId;
+
+-- Top-selling products by date range
+getTopProductsByDateRange:
+SELECT
+    p.id,
+    p.name,
+    p.price,
+    p.emoji,
+    SUM(si.quantity) AS total_sold,
+    SUM(si.subtotal) AS total_revenue
+FROM SaleItems si
+INNER JOIN Products p ON p.id = si.product_id
+INNER JOIN Sales s    ON s.id  = si.sale_id
+WHERE s.timestamp >= :startMs AND s.timestamp < :endMs
+GROUP BY p.id
+ORDER BY total_sold DESC;

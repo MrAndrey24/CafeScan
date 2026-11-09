@@ -1,0 +1,20 @@
+/**
+ * Copyright (c) 2026 Andrey Acosta Ramirez
+ * All Rights Reserved.
+ *
+ * This software is confidential and proprietary. Unauthorized copying,
+ * distribution, or modification of this file is strictly prohibited.
+ *
+ */
+package io.github.mrandrey24.cafescan
+
+import kotlin.test.Test
+import kotlin.test.assertEquals
+
+class ComposeAppCommonTest {
+
+  @Test
+  fun example() {
+    assertEquals(3, 1 + 2)
+  }
+}
