@@ -24,9 +24,10 @@
 package io.github.mrandrey24.cafescan.presentation.state
 
 import io.github.mrandrey24.cafescan.domain.entities.StockItem
+import kotlinx.coroutines.flow.Flow
 
 data class InventoryUiState(
-    val items: List<StockItem> = emptyList(),
+    val items: Flow<List<StockItem>>,
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
 )

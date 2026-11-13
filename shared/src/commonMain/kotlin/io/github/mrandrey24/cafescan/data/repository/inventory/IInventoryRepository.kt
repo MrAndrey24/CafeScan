@@ -24,9 +24,11 @@
 package io.github.mrandrey24.cafescan.data.repository.inventory
 
 import io.github.mrandrey24.cafescan.domain.entities.StockItem
+import kotlinx.coroutines.flow.Flow
 
 interface IInventoryRepository {
-  suspend fun getAllActiveWithStock(): List<StockItem>
+
+  fun getAllActiveWithStockFlow(): Flow<List<StockItem>>
 
   suspend fun updateStockAndPrice(productId: Long, currentQty: Int, price: Double)
 }

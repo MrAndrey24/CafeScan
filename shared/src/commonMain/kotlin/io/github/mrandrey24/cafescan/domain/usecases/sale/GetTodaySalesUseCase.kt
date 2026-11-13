@@ -26,6 +26,7 @@ package io.github.mrandrey24.cafescan.domain.usecases.sale
 import io.github.mrandrey24.cafescan.data.repository.sale.ISaleRepository
 import io.github.mrandrey24.cafescan.domain.entities.Sale
 import kotlin.time.Clock
+import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
@@ -33,11 +34,11 @@ import kotlinx.datetime.plus
 import kotlinx.datetime.toLocalDateTime
 
 class GetTodaySalesUseCase(private val saleRepository: ISaleRepository) {
-  suspend operator fun invoke(): List<Sale> {
+  suspend operator fun invoke(): Flow<List<Sale>> {
     val timeZone = TimeZone.currentSystemDefault()
     val today = Clock.System.now().toLocalDateTime(timeZone).date
     val startMs = today.atStartOfDayIn(timeZone).toEpochMilliseconds()
     val endMs = today.plus(1, DateTimeUnit.DAY).atStartOfDayIn(timeZone).toEpochMilliseconds()
-    return saleRepository.getSalesForDateRange(startMs, endMs)
+    return saleRepository.getSalesForDateRangeFlow(startMs, endMs)
   }
 }

@@ -50,7 +50,7 @@ class GetSalesSummaryUseCase(private val saleRepository: ISaleRepository) {
                   .toEpochMilliseconds()
         }
 
-    val sales = saleRepository.getSalesForDateRange(startMs, endMs)
+    val sales = saleRepository.getSalesForDateRangeFlow(startMs, endMs)
     val topProducts = saleRepository.getTopProducts(startMs, endMs)
 
     val totalRevenue = sales.sumOf { it.total }

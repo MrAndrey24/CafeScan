@@ -23,6 +23,9 @@
  */
 package io.github.mrandrey24.cafescan.domain.entities
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class StockItem(
     val product: Product,
     val currentQty: Int,

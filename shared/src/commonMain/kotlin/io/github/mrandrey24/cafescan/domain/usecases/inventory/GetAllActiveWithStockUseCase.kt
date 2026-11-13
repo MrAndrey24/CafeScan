@@ -25,7 +25,8 @@ package io.github.mrandrey24.cafescan.domain.usecases.inventory
 
 import io.github.mrandrey24.cafescan.data.repository.inventory.IInventoryRepository
 import io.github.mrandrey24.cafescan.domain.entities.StockItem
+import kotlinx.coroutines.flow.Flow
 
 class GetAllActiveWithStockUseCase(private val inventoryRepository: IInventoryRepository) {
-  suspend operator fun invoke(): List<StockItem> = inventoryRepository.getAllActiveWithStock()
+  operator fun invoke(): Flow<List<StockItem>> = inventoryRepository.getAllActiveWithStockFlow()
 }

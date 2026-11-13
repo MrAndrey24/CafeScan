@@ -24,23 +24,42 @@
 package io.github.mrandrey24.cafescan.data.repository.sale
 
 import io.github.mrandrey24.cafescan.data.local.sale.ISaleLocalDataSource
+import io.github.mrandrey24.cafescan.data.remote.sale.ISaleRemoteDataSource
 import io.github.mrandrey24.cafescan.domain.entities.Sale
 import io.github.mrandrey24.cafescan.domain.entities.TopProduct
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.withContext
 
 class SaleRepository(
     private val saleLocalDataSource: ISaleLocalDataSource,
+    private val saleRemoteDataSource: ISaleRemoteDataSource,
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : ISaleRepository {
 
   override suspend fun saveSale(sale: Sale): Sale =
-      withContext(ioDispatcher) { saleLocalDataSource.saveSale(sale) }
+      withContext(ioDispatcher) {
+        val savedLocalSale = saleLocalDataSource.saveSale(sale)
+        runCatching { saleRemoteDataSource.saveSaleRemote(savedLocalSale) }
+        savedLocalSale
+      }
 
-  override suspend fun getSalesForDateRange(startMs: Long, endMs: Long): List<Sale> =
-      withContext(ioDispatcher) { saleLocalDataSource.getSalesForDateRange(startMs, endMs) }
+  override fun getSalesForDateRangeFlow(startMs: Long, endMs: Long): Flow<List<Sale>> =
+      saleRemoteDataSource
+          .getSalesForDateRangeRemote(startMs, endMs)
+          .onEach { sales -> sales.forEach { sale -> saleLocalDataSource.saveSale(sale) } }
+          .flowOn(ioDispatcher)
+          .catch { _ ->
+            val cachedSales = saleLocalDataSource.getSalesForDateRange(startMs, endMs)
+            if (cachedSales.isNotEmpty()) {
+              emit(cachedSales)
+            }
+          }
 
   override suspend fun getTopProducts(startMs: Long, endMs: Long): List<TopProduct> =
       withContext(ioDispatcher) { saleLocalDataSource.getTopProducts(startMs, endMs) }

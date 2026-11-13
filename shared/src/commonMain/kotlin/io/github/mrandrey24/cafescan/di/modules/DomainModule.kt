@@ -23,7 +23,6 @@
  */
 package io.github.mrandrey24.cafescan.di.modules
 
-import io.github.mrandrey24.cafescan.domain.usecases.UpdateStockUseCase
 import io.github.mrandrey24.cafescan.domain.usecases.inventory.GetAllActiveWithStockUseCase
 import io.github.mrandrey24.cafescan.domain.usecases.product.CheckProductNameExistsUseCase
 import io.github.mrandrey24.cafescan.domain.usecases.product.DeleteProductUseCase
@@ -34,6 +33,7 @@ import io.github.mrandrey24.cafescan.domain.usecases.sale.SaveSaleUseCase
 import io.github.mrandrey24.cafescan.domain.usecases.scanner.CheckProductAvailabilityUseCase
 import io.github.mrandrey24.cafescan.domain.usecases.scanner.DecrementStockUseCase
 import io.github.mrandrey24.cafescan.domain.usecases.scanner.GetProductByIdUseCase
+import io.github.mrandrey24.cafescan.domain.usecases.stock.UpdateStockUseCase
 import org.koin.dsl.module
 
 val domainModule = module {

@@ -24,22 +24,43 @@
 package io.github.mrandrey24.cafescan.data.repository.product
 
 import io.github.mrandrey24.cafescan.data.local.product.IProductLocalDataSource
+import io.github.mrandrey24.cafescan.data.remote.product.IProductRemoteDataSource
 import io.github.mrandrey24.cafescan.domain.entities.Product
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.withContext
 
 class ProductRepository(
     private val localProductDataSource: IProductLocalDataSource,
+    private val remoteProductRemoteDataSource: IProductRemoteDataSource,
     private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : IProductRepository {
 
   override suspend fun saveProduct(product: Product): Product =
-      withContext(ioDispatcher) { localProductDataSource.createProduct(product) }
+      withContext(ioDispatcher) {
+        val savedLocalProduct = localProductDataSource.createProduct(product = product)
+        runCatching { remoteProductRemoteDataSource.saveProduct(product = savedLocalProduct) }
+        savedLocalProduct
+      }
 
-  override suspend fun retrieveAllProducts(): List<Product> =
-      withContext(ioDispatcher) { localProductDataSource.getAllProducts() }
+  override fun retrieveAllProducts(): Flow<List<Product>> =
+      remoteProductRemoteDataSource
+          .retrieveAllProducts()
+          .onEach { products ->
+            products.forEach { product -> localProductDataSource.createProduct(product) }
+          }
+          .flowOn(ioDispatcher)
+          .catch { _ ->
+            val cachedProducts = localProductDataSource.getAllProducts()
+            if (cachedProducts.isNotEmpty()) {
+              emit(cachedProducts)
+            }
+          }
 
   override suspend fun retrieveProductById(id: Long): Product? =
       withContext(ioDispatcher) { localProductDataSource.getProductById(id) }

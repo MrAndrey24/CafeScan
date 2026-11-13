@@ -21,6 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
   alias(libs.plugins.kotlinMultiplatform)
   alias(libs.plugins.androidKotlinMultiplatformLibrary)
@@ -37,6 +39,8 @@ kotlin {
     namespace = "io.github.mrandrey24.cafescan"
     compileSdk = 36
     minSdk = 24
+
+    compilerOptions { jvmTarget.set(JvmTarget.JVM_17) }
 
     withHostTestBuilder {}
 
@@ -82,6 +86,9 @@ kotlin {
         implementation(libs.ktor.serialization.kotlinx.json)
         // QRKit
         implementation(libs.qr.kit)
+        // Firebase Kotlin SDK (GitLive)
+        implementation(libs.gitlive.firebase.auth)
+        implementation(libs.gitlive.firebase.firestore)
       }
     }
 
@@ -103,7 +110,10 @@ kotlin {
         implementation(libs.ktor.client.okhttp)
         // SQLDelight
         implementation(libs.sqldelight.driver.android)
-        // Coroutine
+        // GitLive Firebase
+        implementation(project.dependencies.platform(libs.firebase.bom))
+        // Koin & Coroutines
+        implementation(libs.koin.android)
         implementation(libs.kotlinx.coroutines.android)
       }
     }

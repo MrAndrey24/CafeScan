@@ -23,6 +23,9 @@
  */
 package io.github.mrandrey24.cafescan.domain.entities
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class Sale(val id: String, val items: List<OrderItem>, val timestamp: Long) {
   val total: Double
     get() = items.sumOf { it.subtotal }

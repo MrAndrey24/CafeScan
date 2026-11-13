@@ -25,9 +25,9 @@ package io.github.mrandrey24.cafescan.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import io.github.mrandrey24.cafescan.domain.usecases.UpdateStockUseCase
 import io.github.mrandrey24.cafescan.domain.usecases.inventory.GetAllActiveWithStockUseCase
 import io.github.mrandrey24.cafescan.domain.usecases.product.DeleteProductUseCase
+import io.github.mrandrey24.cafescan.domain.usecases.stock.UpdateStockUseCase
 import io.github.mrandrey24.cafescan.presentation.state.InventoryUiState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

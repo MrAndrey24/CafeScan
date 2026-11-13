@@ -31,6 +31,12 @@ import io.github.mrandrey24.cafescan.data.local.product.IProductLocalDataSource
 import io.github.mrandrey24.cafescan.data.local.product.ProductLocalDataSource
 import io.github.mrandrey24.cafescan.data.local.sale.ISaleLocalDataSource
 import io.github.mrandrey24.cafescan.data.local.sale.SaleLocalDataSource
+import io.github.mrandrey24.cafescan.data.remote.inventory.IInventoryRemoteDataSource
+import io.github.mrandrey24.cafescan.data.remote.inventory.InventoryRemoteDataSource
+import io.github.mrandrey24.cafescan.data.remote.product.IProductRemoteDataSource
+import io.github.mrandrey24.cafescan.data.remote.product.ProductRemoteDataSource
+import io.github.mrandrey24.cafescan.data.remote.sale.ISaleRemoteDataSource
+import io.github.mrandrey24.cafescan.data.remote.sale.SaleRemoteDataSource
 import io.github.mrandrey24.cafescan.data.repository.inventory.IInventoryRepository
 import io.github.mrandrey24.cafescan.data.repository.inventory.InventoryRepository
 import io.github.mrandrey24.cafescan.data.repository.product.IProductRepository
@@ -43,10 +49,19 @@ val dataModule = module {
   single { get<DriverFactory>().createDriver() }
   single { AppDatabase(get()) }
   single { get<AppDatabase>().appDatabaseQueries }
+
+  // Data sources
   single<IProductLocalDataSource> { ProductLocalDataSource(get()) }
-  single<IProductRepository> { ProductRepository(get()) }
+  single<IProductRemoteDataSource> { ProductRemoteDataSource() }
+
   single<IInventoryLocalDataSource> { InventoryLocalDataSource(get()) }
-  single<IInventoryRepository> { InventoryRepository(get()) }
+  single<IInventoryRemoteDataSource> { InventoryRemoteDataSource() }
+
   single<ISaleLocalDataSource> { SaleLocalDataSource(get()) }
-  single<ISaleRepository> { SaleRepository(get()) }
+  single<ISaleRemoteDataSource> { SaleRemoteDataSource() }
+
+  // Repositories
+  single<IProductRepository> { ProductRepository(get(), get()) }
+  single<IInventoryRepository> { InventoryRepository(get(), get(), get(), get()) }
+  single<ISaleRepository> { SaleRepository(get(), get()) }
 }

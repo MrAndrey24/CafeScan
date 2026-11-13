@@ -27,7 +27,11 @@ serialization-json = "1.10.0"
 ktor = "3.4.0"
 kotlinx-coroutines = "1.10.2"
 dateTime = "0.7.1"
+google-services = "4.5.0"
+firebase-bom = "35.1.0"
+firebase-gitlive-sdk = "2.8.0"
 spotless = "8.4.0"
+material = "1.10.0"
 
 [libraries]
 # Test
@@ -87,6 +91,16 @@ kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serializa
 # SQLDelight
 sqldelight-driver-android = { module = "app.cash.sqldelight:android-driver", version.ref = "sqldelight" }
 sqldelight-driver-native = { module = "app.cash.sqldelight:native-driver", version.ref = "sqldelight" }
+# Firebase & GitLive
+gitlive-firebase-common = { module = "dev.gitlive:firebase-common", version.ref = "firebase-gitlive-sdk" }
+gitlive-firebase-app = { module = "dev.gitlive:firebase-app", version.ref = "firebase-gitlive-sdk" }
+gitlive-firebase-analytics = { module = "dev.gitlive:firebase-analytics", version.ref = "firebase-gitlive-sdk" }
+gitlive-firebase-crashlytics = { module = "dev.gitlive:firebase-crashlytics", version.ref = "firebase-gitlive-sdk" }
+gitlive-firebase-auth = { module = "dev.gitlive:firebase-auth", version.ref = "firebase-gitlive-sdk" }
+gitlive-firebase-firestore = { module = "dev.gitlive:firebase-firestore", version.ref = "firebase-gitlive-sdk" }
+gitlive-firebase-messaging = { module = "dev.gitlive:firebase-messaging", version.ref = "firebase-gitlive-sdk" }
+firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebase-bom" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 
 
 [plugins]
@@ -102,3 +116,6 @@ androidLint = { id = "com.android.lint", version.ref = "agp" }
 sqlDelight = { id = "app.cash.sqldelight", version.ref = "sqldelight" }
 # Formatting
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
+# Google Services
+googleServices = { id = "com.google.gms.google-services", version.ref = "google-services" }
+kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }

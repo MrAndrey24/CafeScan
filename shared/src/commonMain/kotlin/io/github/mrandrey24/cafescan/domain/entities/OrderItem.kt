@@ -23,6 +23,9 @@
  */
 package io.github.mrandrey24.cafescan.domain.entities
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class OrderItem(val product: Product, var quantity: Int) {
   val subtotal: Double
     get() = product.price * quantity
