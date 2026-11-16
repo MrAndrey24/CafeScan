@@ -35,10 +35,10 @@ kotlin {
   // Target declarations - add or remove as needed below. These define
   // which platforms this KMP module supports.
   // See: https://kotlinlang.org/docs/multiplatform-discover-project.html#targets
-  androidLibrary {
+  android {
     namespace = "io.github.mrandrey24.cafescan.shared"
-    compileSdk = 37
-    minSdk = 24
+    compileSdk = libs.versions.android.compileSdk.get().toInt()
+    minSdk = libs.versions.android.minSdk.get().toInt()
 
     compilerOptions { jvmTarget.set(JvmTarget.JVM_17) }
 
@@ -56,6 +56,8 @@ kotlin {
   // project can be found here:
   // https://developer.android.com/kotlin/multiplatform/migrate
   val xcfName = "sharedKit"
+
+  iosX64 { binaries.framework { baseName = xcfName } }
 
   iosArm64 { binaries.framework { baseName = xcfName } }
 

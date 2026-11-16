@@ -108,8 +108,8 @@ class SaleLocalDataSource(
               name = row.name,
               price = row.price,
               emoji = row.emoji,
-              totalSold = row.total_sold ?: 0L,
-              totalRevenue = row.total_revenue ?: 0.0,
+              totalSold = row.total_sold,
+              totalRevenue = row.total_revenue,
           )
         }
       }

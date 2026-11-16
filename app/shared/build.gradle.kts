@@ -32,7 +32,7 @@ plugins {
 }
 
 kotlin {
-  androidLibrary {
+  android {
     namespace = "io.github.mrandrey24.cafescan.ui"
     compileSdk = 37
     minSdk = 24
@@ -42,7 +42,7 @@ kotlin {
 
   listOf(iosArm64(), iosSimulatorArm64()).forEach { iosTarget ->
     iosTarget.binaries.framework {
-      baseName = "ComposeApp"
+      baseName = "Shared"
       isStatic = true
     }
   }
@@ -51,12 +51,9 @@ kotlin {
     androidMain.dependencies {
       implementation(libs.compose.uiToolingPreview)
       implementation(libs.androidx.activity.compose)
-
-      // Koin
-      implementation(project.dependencies.platform(libs.koin.bom))
-      implementation(libs.koin.android)
     }
     commonMain.dependencies {
+      // Core
       implementation(libs.compose.runtime)
       implementation(libs.compose.foundation)
       implementation(libs.compose.material3)
