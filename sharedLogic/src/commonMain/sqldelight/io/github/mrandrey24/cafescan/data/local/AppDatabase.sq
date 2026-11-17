@@ -43,6 +43,10 @@ insertProduct:
 INSERT INTO Products(id, name, price, cost, emoji, qr_string, is_active, created_at, updated_at)
 VALUES (:id, :name, :price, :cost, :emoji, :qr_string, :is_active, :created_at, :updated_at);
 
+insertOrReplaceProduct:
+INSERT OR REPLACE INTO Products(id, name, price, cost, emoji, qr_string, is_active, created_at, updated_at)
+VALUES (:id, :name, :price, :cost, :emoji, :qr_string, :is_active, :created_at, :updated_at);
+
 updateProduct:
 UPDATE Products
 SET name       = :name,
@@ -64,6 +68,13 @@ WHERE id = :id;
 deleteProduct:
 DELETE FROM Products
 WHERE id = :id;
+
+deleteAllProducts:
+DELETE FROM Products;
+
+deleteProductsNotIn:
+DELETE FROM Products
+WHERE id NOT IN :ids;
 
 selectAllProducts:
 SELECT * FROM Products;

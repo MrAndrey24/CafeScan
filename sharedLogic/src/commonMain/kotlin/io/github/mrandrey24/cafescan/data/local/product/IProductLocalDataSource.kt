@@ -28,6 +28,8 @@ import io.github.mrandrey24.cafescan.domain.entities.Product
 interface IProductLocalDataSource {
   suspend fun createProduct(product: Product): Product
 
+  suspend fun clearAndUpdateProducts(remoteProducts: List<Product>)
+
   suspend fun getAllProducts(): List<Product>
 
   suspend fun getProductById(id: Long): Product?

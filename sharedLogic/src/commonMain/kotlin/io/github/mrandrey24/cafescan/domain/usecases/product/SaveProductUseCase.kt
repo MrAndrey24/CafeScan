@@ -28,6 +28,6 @@ import io.github.mrandrey24.cafescan.domain.entities.Product
 
 class SaveProductUseCase(private val repository: IProductRepository) {
   suspend operator fun invoke(product: Product): Product {
-    return repository.saveProduct(product)
+    return repository.createProduct(product)
   }
 }

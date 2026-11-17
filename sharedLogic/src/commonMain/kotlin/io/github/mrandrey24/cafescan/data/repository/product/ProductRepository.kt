@@ -28,52 +28,65 @@ import io.github.mrandrey24.cafescan.data.remote.product.IProductRemoteDataSourc
 import io.github.mrandrey24.cafescan.domain.entities.Product
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.withContext
 
 class ProductRepository(
     private val localProductDataSource: IProductLocalDataSource,
     private val remoteProductRemoteDataSource: IProductRemoteDataSource,
-    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
+    private val defaultDispatcher: CoroutineDispatcher = Dispatchers.Default,
 ) : IProductRepository {
 
-  override suspend fun saveProduct(product: Product): Product =
-      withContext(ioDispatcher) {
-        val savedLocalProduct = localProductDataSource.createProduct(product = product)
-        runCatching { remoteProductRemoteDataSource.saveProduct(product = savedLocalProduct) }
-        savedLocalProduct
-      }
+  override suspend fun createProduct(product: Product): Product {
+    return localProductDataSource.createProduct(product = product).also { savedLocalProduct ->
+      runCatching { remoteProductRemoteDataSource.saveProduct(product = savedLocalProduct) }
+          .onFailure {
+            localProductDataSource.createProduct(product = product)
+          }
+    }
+  }
 
-  override fun retrieveAllProducts(): Flow<List<Product>> =
+  override suspend fun retrieveAllProducts(): Flow<List<Product>> = flow {
+    val cachedProducts = localProductDataSource.getAllProducts()
+    if (cachedProducts.isNotEmpty()) {
+      emit(cachedProducts)
+    }
+
+    try {
       remoteProductRemoteDataSource
           .retrieveAllProducts()
-          .onEach { products ->
-            products.forEach { product -> localProductDataSource.createProduct(product) }
+          .catch { exception ->
+            println("Failed fetching products from network. Using local cache: $exception")
           }
-          .flowOn(ioDispatcher)
-          .catch { _ ->
-            val cachedProducts = localProductDataSource.getAllProducts()
-            if (cachedProducts.isNotEmpty()) {
-              emit(cachedProducts)
-            }
+          .collect { remoteProducts ->
+            localProductDataSource.clearAndUpdateProducts(remoteProducts)
+            emit(localProductDataSource.getAllProducts())
           }
+    } catch (exception: Exception) {
+      println("Failed setting up remote product listener: $exception")
+    }
+  }
+      .flowOn(defaultDispatcher)
 
-  override suspend fun retrieveProductById(id: Long): Product? =
-      withContext(ioDispatcher) { localProductDataSource.getProductById(id) }
+  override suspend fun retrieveProductById(id: Long): Product? {
+    return localProductDataSource.getProductById(id)
+  }
 
-  override suspend fun retrieveProductByStock(id: Long): Boolean =
-      withContext(ioDispatcher) { localProductDataSource.getProductByStock(id) }
+  override suspend fun retrieveProductByStock(id: Long): Boolean {
+    return localProductDataSource.getProductByStock(id)
+  }
 
-  override suspend fun isNameExists(name: String): Boolean =
-      withContext(ioDispatcher) { localProductDataSource.getProductByName(name) }
+  override suspend fun isNameExists(name: String): Boolean {
+    return localProductDataSource.getProductByName(name)
+  }
 
-  override suspend fun deleteProduct(id: Long): Unit =
-      withContext(ioDispatcher) { localProductDataSource.deleteProduct(id) }
+  override suspend fun deleteProduct(id: Long) {
+    localProductDataSource.deleteProduct(id)
+  }
 
-  override suspend fun decrementStock(productId: Long, qty: Long): Unit =
-      withContext(ioDispatcher) { localProductDataSource.decrementStock(productId, qty) }
+  override suspend fun decrementStock(productId: Long, qty: Long) {
+    localProductDataSource.decrementStock(productId, qty)
+  }
 }

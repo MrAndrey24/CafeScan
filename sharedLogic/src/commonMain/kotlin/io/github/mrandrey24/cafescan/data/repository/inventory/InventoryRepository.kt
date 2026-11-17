@@ -28,49 +28,53 @@ import io.github.mrandrey24.cafescan.data.remote.inventory.IInventoryRemoteDataS
 import io.github.mrandrey24.cafescan.domain.entities.StockItem
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.withContext
 
 class InventoryRepository(
     private val inventoryLocalDataSource: IInventoryLocalDataSource,
     private val inventoryRemoteDataSource: IInventoryRemoteDataSource,
-    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
     private val defaultDispatcher: CoroutineDispatcher = Dispatchers.Default,
 ) : IInventoryRepository {
 
-  override fun getAllActiveWithStockFlow(): Flow<List<StockItem>> =
+  override fun getAllActiveWithStockFlow(): Flow<List<StockItem>> = flow {
+    val cachedItems = inventoryLocalDataSource.getAllActiveWithStock()
+    if (cachedItems.isNotEmpty()) {
+      emit(cachedItems)
+    }
+
+    try {
       inventoryRemoteDataSource
           .getAllActiveWithStockRemote()
-          .onEach { items ->
-            items.forEach { item ->
+          .catch { exception ->
+            println("Failed fetching stock from network. Using local cache: $exception")
+          }
+          .collect { remoteItems ->
+            remoteItems.forEach { item ->
               inventoryLocalDataSource.updateStockAndPrice(
                   item.product.id,
                   item.currentQty,
                   item.product.price,
               )
             }
+            emit(inventoryLocalDataSource.getAllActiveWithStock())
           }
-          .flowOn(defaultDispatcher)
-          .catch { _ ->
-            val cachedItems = inventoryLocalDataSource.getAllActiveWithStock()
-            if (cachedItems.isNotEmpty()) {
-              emit(cachedItems)
-            }
-          }
+    } catch (exception: Exception) {
+      println("Failed setting up remote inventory listener: $exception")
+    }
+  }
+      .flowOn(defaultDispatcher)
 
   override suspend fun updateStockAndPrice(
       productId: Long,
       currentQty: Int,
       price: Double,
-  ): Unit =
-      withContext(ioDispatcher) {
-        inventoryLocalDataSource.updateStockAndPrice(productId, currentQty, price)
-        runCatching {
-          inventoryRemoteDataSource.updateStockAndPriceRemote(productId, currentQty, price)
-        }
-      }
+  ) {
+    inventoryLocalDataSource.updateStockAndPrice(productId, currentQty, price)
+    runCatching {
+      inventoryRemoteDataSource.updateStockAndPriceRemote(productId, currentQty, price)
+    }
+  }
 }
