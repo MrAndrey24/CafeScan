@@ -34,32 +34,32 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 
 class InventoryRepository(
-    private val inventoryLocalDataSource: IInventoryLocalDataSource,
-    private val inventoryRemoteDataSource: IInventoryRemoteDataSource,
+    private val localInventoryDataSource: IInventoryLocalDataSource,
+    private val remoteInventoryDataSource: IInventoryRemoteDataSource,
     private val defaultDispatcher: CoroutineDispatcher = Dispatchers.Default,
 ) : IInventoryRepository {
 
   override fun getAllActiveWithStockFlow(): Flow<List<StockItem>> = flow {
-    val cachedItems = inventoryLocalDataSource.getAllActiveWithStock()
+    val cachedItems = localInventoryDataSource.getAllActiveWithStock()
     if (cachedItems.isNotEmpty()) {
       emit(cachedItems)
     }
 
     try {
-      inventoryRemoteDataSource
+      remoteInventoryDataSource
           .getAllActiveWithStockRemote()
           .catch { exception ->
             println("Failed fetching stock from network. Using local cache: $exception")
           }
           .collect { remoteItems ->
             remoteItems.forEach { item ->
-              inventoryLocalDataSource.updateStockAndPrice(
+              localInventoryDataSource.updateStockAndPrice(
                   item.product.id,
                   item.currentQty,
                   item.product.price,
               )
             }
-            emit(inventoryLocalDataSource.getAllActiveWithStock())
+            emit(localInventoryDataSource.getAllActiveWithStock())
           }
     } catch (exception: Exception) {
       println("Failed setting up remote inventory listener: $exception")
@@ -72,9 +72,12 @@ class InventoryRepository(
       currentQty: Int,
       price: Double,
   ) {
-    inventoryLocalDataSource.updateStockAndPrice(productId, currentQty, price)
+    localInventoryDataSource.updateStockAndPrice(productId, currentQty, price)
     runCatching {
-      inventoryRemoteDataSource.updateStockAndPriceRemote(productId, currentQty, price)
+      remoteInventoryDataSource.updateStockAndPriceRemote(productId, currentQty, price)
     }
+        .onFailure { exception ->
+          println("Failed updating remote stock and price: $exception")
+        }
   }
 }

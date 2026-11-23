@@ -29,38 +29,49 @@ import io.github.mrandrey24.cafescan.domain.entities.Sale
 import io.github.mrandrey24.cafescan.domain.entities.TopProduct
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.withContext
 
 class SaleRepository(
-    private val saleLocalDataSource: ISaleLocalDataSource,
-    private val saleRemoteDataSource: ISaleRemoteDataSource,
-    private val ioDispatcher: CoroutineDispatcher = Dispatchers.IO,
+    private val localSaleDataSource: ISaleLocalDataSource,
+    private val remoteSaleDataSource: ISaleRemoteDataSource,
+    private val defaultDispatcher: CoroutineDispatcher = Dispatchers.Default,
 ) : ISaleRepository {
 
-  override suspend fun saveSale(sale: Sale): Sale =
-      withContext(ioDispatcher) {
-        val savedLocalSale = saleLocalDataSource.saveSale(sale)
-        runCatching { saleRemoteDataSource.saveSaleRemote(savedLocalSale) }
-        savedLocalSale
-      }
+  override suspend fun saveSale(sale: Sale): Sale {
+    val savedLocalSale = localSaleDataSource.saveSale(sale)
+    runCatching { remoteSaleDataSource.saveSaleRemote(savedLocalSale) }
+        .onFailure { exception ->
+          println("Failed saving sale to remote: $exception")
+        }
+    return savedLocalSale
+  }
 
-  override fun getSalesForDateRangeFlow(startMs: Long, endMs: Long): Flow<List<Sale>> =
-      saleRemoteDataSource
+  override fun getSalesForDateRangeFlow(startMs: Long, endMs: Long): Flow<List<Sale>> = flow {
+    val cachedSales = localSaleDataSource.getSalesForDateRange(startMs, endMs)
+    if (cachedSales.isNotEmpty()) {
+      emit(cachedSales)
+    }
+
+    try {
+      remoteSaleDataSource
           .getSalesForDateRangeRemote(startMs, endMs)
-          .onEach { sales -> sales.forEach { sale -> saleLocalDataSource.saveSale(sale) } }
-          .flowOn(ioDispatcher)
-          .catch { _ ->
-            val cachedSales = saleLocalDataSource.getSalesForDateRange(startMs, endMs)
-            if (cachedSales.isNotEmpty()) {
-              emit(cachedSales)
-            }
+          .catch { exception ->
+            println("Failed fetching sales from network. Using local cache: $exception")
           }
+          .collect { remoteSales ->
+            remoteSales.forEach { sale -> localSaleDataSource.saveSale(sale) }
+            emit(localSaleDataSource.getSalesForDateRange(startMs, endMs))
+          }
+    } catch (exception: Exception) {
+      println("Failed setting up remote sales listener: $exception")
+    }
+  }
+      .flowOn(defaultDispatcher)
 
-  override suspend fun getTopProducts(startMs: Long, endMs: Long): List<TopProduct> =
-      withContext(ioDispatcher) { saleLocalDataSource.getTopProducts(startMs, endMs) }
+  override suspend fun getTopProducts(startMs: Long, endMs: Long): List<TopProduct> {
+    return localSaleDataSource.getTopProducts(startMs, endMs)
+  }
 }

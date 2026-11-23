@@ -28,6 +28,7 @@ plugins {
   alias(libs.plugins.androidKotlinMultiplatformLibrary)
   alias(libs.plugins.androidLint)
   alias(libs.plugins.sqlDelight)
+  alias(libs.plugins.kotlinxSerialization)
 }
 
 kotlin {

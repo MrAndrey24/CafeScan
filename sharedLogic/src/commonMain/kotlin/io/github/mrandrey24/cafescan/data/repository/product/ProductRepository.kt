@@ -40,12 +40,12 @@ class ProductRepository(
 ) : IProductRepository {
 
   override suspend fun createProduct(product: Product): Product {
-    return localProductDataSource.createProduct(product = product).also { savedLocalProduct ->
-      runCatching { remoteProductRemoteDataSource.saveProduct(product = savedLocalProduct) }
-          .onFailure {
-            localProductDataSource.createProduct(product = product)
-          }
-    }
+    val savedLocalProduct = localProductDataSource.createProduct(product)
+    runCatching { remoteProductRemoteDataSource.saveProduct(savedLocalProduct) }
+        .onFailure { exception ->
+          println("Failed saving product to remote: $exception")
+        }
+    return savedLocalProduct
   }
 
   override suspend fun retrieveAllProducts(): Flow<List<Product>> = flow {
