@@ -32,6 +32,8 @@ plugins {
   alias(libs.plugins.androidKotlinMultiplatformLibrary) apply false
   alias(libs.plugins.androidLint) apply false
   alias(libs.plugins.spotless)
+  alias(libs.plugins.googleServices) apply false
+  alias(libs.plugins.kotlinAndroid) apply false
 }
 
 spotless {
