@@ -32,7 +32,7 @@ data class ProductUiState(
     val isSaving: Boolean = false,
     val isSaved: Boolean = false,
     val isProductNameExists: Boolean = false,
-    val savedProductId: Long? = null,
+    val savedProductId: String? = null,
     val errorMessage: String? = null,
 ) {
   val priceDouble: Double

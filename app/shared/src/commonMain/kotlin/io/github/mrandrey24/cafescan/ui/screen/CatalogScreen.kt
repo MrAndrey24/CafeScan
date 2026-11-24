@@ -85,7 +85,7 @@ fun CatalogScreen(
     onNavigateToScanner: () -> Unit,
     onNavigateToDashboard: () -> Unit,
     onNavigateToInventory: () -> Unit,
-    onNavigateToQrPreview: (Long) -> Unit,
+    onNavigateToQrPreview: (String) -> Unit,
     viewModel: ProductViewModel,
 ) {
 

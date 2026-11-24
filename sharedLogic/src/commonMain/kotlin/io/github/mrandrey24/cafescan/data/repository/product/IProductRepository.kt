@@ -31,13 +31,13 @@ interface IProductRepository {
 
   suspend fun retrieveAllProducts(): Flow<List<Product>>
 
-  suspend fun retrieveProductById(id: Long): Product?
+  suspend fun retrieveProductById(id: String): Product?
 
-  suspend fun retrieveProductByStock(id: Long): Boolean
+  suspend fun retrieveProductByStock(id: String): Boolean
 
   suspend fun isNameExists(name: String): Boolean
 
-  suspend fun deleteProduct(id: Long)
+  suspend fun deleteProduct(id: String)
 
-  suspend fun decrementStock(productId: Long, qty: Long)
+  suspend fun decrementStock(productId: String, qty: Long)
 }

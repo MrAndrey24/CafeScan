@@ -26,5 +26,5 @@ package io.github.mrandrey24.cafescan.domain.usecases.scanner
 import io.github.mrandrey24.cafescan.data.repository.product.IProductRepository
 
 class GetProductByIdUseCase(private val productRepository: IProductRepository) {
-  suspend operator fun invoke(productId: Long) = productRepository.retrieveProductById(productId)
+  suspend operator fun invoke(productId: String) = productRepository.retrieveProductById(productId)
 }

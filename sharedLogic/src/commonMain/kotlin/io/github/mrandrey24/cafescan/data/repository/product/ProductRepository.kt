@@ -70,11 +70,11 @@ class ProductRepository(
   }
       .flowOn(defaultDispatcher)
 
-  override suspend fun retrieveProductById(id: Long): Product? {
+  override suspend fun retrieveProductById(id: String): Product? {
     return localProductDataSource.getProductById(id)
   }
 
-  override suspend fun retrieveProductByStock(id: Long): Boolean {
+  override suspend fun retrieveProductByStock(id: String): Boolean {
     return localProductDataSource.getProductByStock(id)
   }
 
@@ -82,11 +82,11 @@ class ProductRepository(
     return localProductDataSource.getProductByName(name)
   }
 
-  override suspend fun deleteProduct(id: Long) {
+  override suspend fun deleteProduct(id: String) {
     localProductDataSource.deleteProduct(id)
   }
 
-  override suspend fun decrementStock(productId: Long, qty: Long) {
+  override suspend fun decrementStock(productId: String, qty: Long) {
     localProductDataSource.decrementStock(productId, qty)
   }
 }

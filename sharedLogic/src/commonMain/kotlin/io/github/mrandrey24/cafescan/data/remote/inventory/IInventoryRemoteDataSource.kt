@@ -27,7 +27,7 @@ import io.github.mrandrey24.cafescan.domain.entities.StockItem
 import kotlinx.coroutines.flow.Flow
 
 interface IInventoryRemoteDataSource {
-  suspend fun updateStockAndPriceRemote(productId: Long, currentQty: Int, price: Double)
+  suspend fun updateStockAndPriceRemote(productId: String, currentQty: Int, price: Double)
 
   fun getAllActiveWithStockRemote(): Flow<List<StockItem>>
 }

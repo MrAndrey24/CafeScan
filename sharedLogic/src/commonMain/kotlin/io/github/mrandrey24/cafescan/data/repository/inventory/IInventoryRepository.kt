@@ -30,5 +30,5 @@ interface IInventoryRepository {
 
   fun getAllActiveWithStockFlow(): Flow<List<StockItem>>
 
-  suspend fun updateStockAndPrice(productId: Long, currentQty: Int, price: Double)
+  suspend fun updateStockAndPrice(productId: String, currentQty: Int, price: Double)
 }

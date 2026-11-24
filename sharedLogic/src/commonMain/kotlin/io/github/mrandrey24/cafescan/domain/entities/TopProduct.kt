@@ -24,7 +24,7 @@
 package io.github.mrandrey24.cafescan.domain.entities
 
 data class TopProduct(
-    val id: Long,
+    val id: String,
     val name: String,
     val price: Double,
     val emoji: String,

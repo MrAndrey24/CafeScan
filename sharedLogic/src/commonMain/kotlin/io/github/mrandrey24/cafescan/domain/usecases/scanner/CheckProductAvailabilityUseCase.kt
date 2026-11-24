@@ -26,7 +26,7 @@ package io.github.mrandrey24.cafescan.domain.usecases.scanner
 import io.github.mrandrey24.cafescan.data.repository.product.IProductRepository
 
 class CheckProductAvailabilityUseCase(private val productRepository: IProductRepository) {
-  suspend operator fun invoke(productId: Long): Boolean {
+  suspend operator fun invoke(productId: String): Boolean {
     return productRepository.retrieveProductByStock(productId)
   }
 }
