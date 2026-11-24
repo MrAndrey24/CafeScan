@@ -69,7 +69,7 @@ class InventoryLocalDataSource(
   }
 
   override suspend fun updateStockAndPrice(
-      productId: Long,
+      productId: String,
       currentQty: Int,
       price: Double,
   ) {
@@ -91,7 +91,7 @@ class InventoryLocalDataSource(
       if (product != null) {
         val qrPayload =
             QrPayload(
-                id = productId.toString(),
+                id = productId,
                 name = product.name,
                 price = price.toString(),
                 cost = product.cost.toString(),
@@ -108,7 +108,7 @@ class InventoryLocalDataSource(
   }
 
   private fun mapProductSelecting(
-      id: Long,
+      id: String,
       name: String,
       price: Double,
       cost: Double,

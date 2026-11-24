@@ -77,7 +77,7 @@ fun UpdateStockDialog(
     item: StockItem,
     onDismiss: () -> Unit,
     onSave: (newStock: Int, newPrice: Double) -> Unit,
-    onDelete: ((productId: Long) -> Unit)? = null,
+    onDelete: ((productId: String) -> Unit)? = null,
 ) {
   var stockText by remember { mutableStateOf(item.currentQty.toString()) }
   var priceText by remember { mutableStateOf(item.product.price.toString()) }
@@ -202,7 +202,7 @@ fun UpdateStockDialog(
 
             val qrData =
                 QrPayload(
-                        id = item.product.id.toString(),
+                        id = item.product.id,
                         name = item.product.name,
                         price = priceText.ifBlank { item.product.price.toString() },
                         cost = item.product.cost.toString(),

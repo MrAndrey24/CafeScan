@@ -27,6 +27,7 @@ import io.github.mrandrey24.cafescan.data.local.AppDatabase
 import io.github.mrandrey24.cafescan.domain.entities.Product
 import io.github.mrandrey24.cafescan.domain.entities.QrPayload
 import kotlin.time.Clock
+import kotlin.uuid.Uuid
 
 class ProductLocalDataSource(
     database: AppDatabase,
@@ -35,9 +36,10 @@ class ProductLocalDataSource(
 
   override suspend fun createProduct(product: Product): Product = dbQuery.transactionWithResult {
     val now = Clock.System.now().toEpochMilliseconds()
+    val productId = product.id.ifBlank { Uuid.random().toString() }
 
     dbQuery.insertProduct(
-        id = if (product.id == 0L) null else product.id,
+        id = productId,
         name = product.name,
         price = product.price,
         cost = product.cost,
@@ -47,8 +49,6 @@ class ProductLocalDataSource(
         created_at = now,
         updated_at = now,
     )
-
-    val productId = dbQuery.lastInsertRowId().executeAsOne()
 
     dbQuery.insertOrIgnoreStock(
         product_id = productId,
@@ -60,7 +60,7 @@ class ProductLocalDataSource(
 
     val qrPayload =
         QrPayload(
-            id = productId.toString(),
+            id = productId,
             name = product.name,
             price = product.price.toString(),
             cost = product.cost.toString(),
@@ -89,7 +89,7 @@ class ProductLocalDataSource(
 
   override suspend fun clearAndUpdateProducts(remoteProducts: List<Product>) {
     dbQuery.transaction {
-      val remoteIds = remoteProducts.mapNotNull { if (it.id != 0L) it.id else null }
+      val remoteIds = remoteProducts.mapNotNull { it.id.ifBlank { null } }
       if (remoteIds.isNotEmpty()) {
         runCatching { dbQuery.deleteProductsNotIn(remoteIds) }
       } else {
@@ -100,9 +100,10 @@ class ProductLocalDataSource(
         val now = Clock.System.now().toEpochMilliseconds()
         val createdAt = if (product.createdAt == 0L) now else product.createdAt
         val updatedAt = if (product.updatedAt == 0L) now else product.updatedAt
+        val productId = product.id.ifBlank { Uuid.random().toString() }
 
         dbQuery.insertOrReplaceProduct(
-            id = if (product.id == 0L) null else product.id,
+            id = productId,
             name = product.name,
             price = product.price,
             cost = product.cost,
@@ -113,15 +114,13 @@ class ProductLocalDataSource(
             updated_at = updatedAt,
         )
 
-        if (product.id != 0L) {
-          dbQuery.insertOrIgnoreStock(
-              product_id = product.id,
-              current_qty = product.stock,
-              initial_qty = product.stock,
-              low_stock_threshold = 3L,
-              updated_at = updatedAt,
-          )
-        }
+        dbQuery.insertOrIgnoreStock(
+            product_id = productId,
+            current_qty = product.stock,
+            initial_qty = product.stock,
+            low_stock_threshold = 3L,
+            updated_at = updatedAt,
+        )
       }
     }
   }
@@ -129,26 +128,26 @@ class ProductLocalDataSource(
   override suspend fun getAllProducts(): List<Product> =
       dbQuery.selectAllProducts(::mapProductSelecting).executeAsList()
 
-  override suspend fun getProductById(id: Long): Product? =
+  override suspend fun getProductById(id: String): Product? =
       dbQuery.selectProductById(id, ::mapProductSelecting).executeAsOneOrNull()
 
-  override suspend fun getProductByStock(id: Long): Boolean =
+  override suspend fun getProductByStock(id: String): Boolean =
       dbQuery.findProductByStock(id).executeAsOne()
 
   override suspend fun getProductByName(name: String): Boolean =
       dbQuery.findProductByName(name).executeAsOne()
 
-  override suspend fun deleteProduct(id: Long) {
+  override suspend fun deleteProduct(id: String) {
     dbQuery.deleteProduct(id = id)
   }
 
-  override suspend fun decrementStock(productId: Long, qty: Long) {
+  override suspend fun decrementStock(productId: String, qty: Long) {
     val now = Clock.System.now().toEpochMilliseconds()
     dbQuery.decrementStock(qty = qty, updatedAt = now, productId = productId)
   }
 
   private fun mapProductSelecting(
-      id: Long,
+      id: String,
       name: String,
       price: Double,
       cost: Double,

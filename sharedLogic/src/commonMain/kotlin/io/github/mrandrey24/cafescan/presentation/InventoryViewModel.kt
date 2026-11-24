@@ -60,7 +60,7 @@ class InventoryViewModel(
     }
   }
 
-  fun updateStockAndPrice(productId: Long, currentQty: Int, price: Double) {
+  fun updateStockAndPrice(productId: String, currentQty: Int, price: Double) {
     viewModelScope.launch {
       try {
         updateStockUseCase(productId, currentQty, price)
@@ -71,7 +71,7 @@ class InventoryViewModel(
     }
   }
 
-  fun deleteProduct(productId: Long) {
+  fun deleteProduct(productId: String) {
     viewModelScope.launch {
       try {
         deleteProductUseCase(productId)

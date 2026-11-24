@@ -68,7 +68,7 @@ class InventoryRepository(
       .flowOn(defaultDispatcher)
 
   override suspend fun updateStockAndPrice(
-      productId: Long,
+      productId: String,
       currentQty: Int,
       price: Double,
   ) {

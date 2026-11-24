@@ -32,7 +32,11 @@ import kotlinx.coroutines.flow.map
 
 class InventoryRemoteDataSource : IInventoryRemoteDataSource {
 
-  override suspend fun updateStockAndPriceRemote(productId: Long, currentQty: Int, price: Double) {
+  override suspend fun updateStockAndPriceRemote(
+      productId: String,
+      currentQty: Int,
+      price: Double,
+  ) {
     val map =
         mapOf(
             "productId" to productId,
@@ -40,7 +44,7 @@ class InventoryRemoteDataSource : IInventoryRemoteDataSource {
             "price" to price,
             "updatedAt" to Clock.System.now().toEpochMilliseconds(),
         )
-    Firebase.firestore.collection(INVENTORY_COLLECTION).document(productId.toString()).set(map)
+    Firebase.firestore.collection(INVENTORY_COLLECTION).document(productId).set(map)
   }
 
   override fun getAllActiveWithStockRemote(): Flow<List<StockItem>> {

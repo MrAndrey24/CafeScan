@@ -37,7 +37,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable object ProductFormRoute
 
-@Serializable data class QrPreviewRoute(val productId: Long)
+@Serializable data class QrPreviewRoute(val productId: String)
 
 @Serializable object SaleDetailRoute
 

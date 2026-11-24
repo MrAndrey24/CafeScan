@@ -82,7 +82,7 @@ import qrgenerator.shareQrCodeImage
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun QrPreviewScreen(
-    productId: Long,
+    productId: String,
     onBack: () -> Unit,
     onNavigateToScanner: () -> Unit,
     onNavigateToDashboard: () -> Unit,
