@@ -47,9 +47,10 @@ class ProductRepository(
       withTimeoutOrNull(2.seconds) {
         remoteProductRemoteDataSource.saveProduct(savedLocalProduct)
       }
-    }.onFailure { exception ->
-      println("Failed saving product to remote: $exception")
     }
+        .onFailure { exception ->
+          println("Failed saving product to remote: $exception")
+        }
     return savedLocalProduct
   }
 
@@ -93,9 +94,10 @@ class ProductRepository(
       withTimeoutOrNull(2.seconds) {
         remoteProductRemoteDataSource.deleteProduct(id)
       }
-    }.onFailure { exception ->
-      println("Failed deleting product from remote: $exception")
     }
+        .onFailure { exception ->
+          println("Failed deleting product from remote: $exception")
+        }
   }
 
   override suspend fun decrementStock(productId: String, qty: Long) {

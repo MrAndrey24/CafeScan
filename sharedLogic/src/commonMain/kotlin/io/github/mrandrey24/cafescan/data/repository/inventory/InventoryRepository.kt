@@ -79,8 +79,9 @@ class InventoryRepository(
       withTimeoutOrNull(2.seconds) {
         remoteInventoryDataSource.updateStockAndPriceRemote(productId, currentQty, price)
       }
-    }.onFailure { exception ->
-      println("Failed updating remote stock and price: $exception")
     }
+        .onFailure { exception ->
+          println("Failed updating remote stock and price: $exception")
+        }
   }
 }
