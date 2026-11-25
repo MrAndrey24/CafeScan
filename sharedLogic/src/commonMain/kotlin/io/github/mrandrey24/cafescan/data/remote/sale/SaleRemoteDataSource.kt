@@ -26,7 +26,6 @@ package io.github.mrandrey24.cafescan.data.remote.sale
 import dev.gitlive.firebase.Firebase
 import dev.gitlive.firebase.firestore.firestore
 import io.github.mrandrey24.cafescan.domain.entities.Sale
-import kotlin.uuid.Uuid
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
@@ -34,9 +33,6 @@ class SaleRemoteDataSource : ISaleRemoteDataSource {
 
   override suspend fun saveSaleRemote(sale: Sale): Sale {
     Firebase.firestore.collection(SALES_COLLECTION).document(sale.id).set(sale)
-//    val id = sale.id.ifBlank { Uuid.random().toString() }
-//    val saleToSave = sale.copy(id = id)
-//    collection.document(id).set(saleToSave)
     return sale
   }
 

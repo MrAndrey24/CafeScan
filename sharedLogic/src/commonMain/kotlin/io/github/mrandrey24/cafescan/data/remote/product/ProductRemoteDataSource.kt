@@ -26,16 +26,12 @@ package io.github.mrandrey24.cafescan.data.remote.product
 import dev.gitlive.firebase.Firebase
 import dev.gitlive.firebase.firestore.firestore
 import io.github.mrandrey24.cafescan.domain.entities.Product
-import kotlin.uuid.Uuid
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 class ProductRemoteDataSource : IProductRemoteDataSource {
   override suspend fun saveProduct(product: Product): Product {
     Firebase.firestore.collection(PRODUCTS_COLLECTION).document(product.id).set(product)
-//    val id = product.id.ifBlank { Uuid.random().toString() }
-//    val productToSave = product.copy(id = id)
-//    collection.document(id).set(productToSave)
     return product
   }
 

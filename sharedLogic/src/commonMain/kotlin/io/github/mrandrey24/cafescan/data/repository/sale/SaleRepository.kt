@@ -40,7 +40,7 @@ class SaleRepository(
     private val defaultDispatcher: CoroutineDispatcher = Dispatchers.Default,
 ) : ISaleRepository {
 
-  override suspend fun saveSale(sale: Sale): Sale {
+  override suspend fun createSale(sale: Sale): Sale {
     val savedLocalSale = localSaleDataSource.saveSale(sale)
     runCatching { remoteSaleDataSource.saveSaleRemote(savedLocalSale) }
         .onFailure { exception ->

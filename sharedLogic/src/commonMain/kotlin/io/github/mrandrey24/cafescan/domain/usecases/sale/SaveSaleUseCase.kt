@@ -37,7 +37,7 @@ class SaveSaleUseCase(
   suspend operator fun invoke(items: List<OrderItem>): Sale {
     val now = Clock.System.now().toEpochMilliseconds()
     val sale = Sale(id = Uuid.random().toString(), items = items, timestamp = now)
-    val savedSale = saleRepository.saveSale(sale)
+    val savedSale = saleRepository.createSale(sale)
 
     items.forEach { item -> decrementStockUseCase(item.product.id, item.quantity.toLong()) }
 
