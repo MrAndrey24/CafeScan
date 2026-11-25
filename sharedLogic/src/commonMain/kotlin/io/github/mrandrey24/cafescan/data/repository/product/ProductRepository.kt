@@ -26,12 +26,14 @@ package io.github.mrandrey24.cafescan.data.repository.product
 import io.github.mrandrey24.cafescan.data.local.product.IProductLocalDataSource
 import io.github.mrandrey24.cafescan.data.remote.product.IProductRemoteDataSource
 import io.github.mrandrey24.cafescan.domain.entities.Product
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.withTimeoutOrNull
 
 class ProductRepository(
     private val localProductDataSource: IProductLocalDataSource,
@@ -41,10 +43,13 @@ class ProductRepository(
 
   override suspend fun createProduct(product: Product): Product {
     val savedLocalProduct = localProductDataSource.createProduct(product)
-    runCatching { remoteProductRemoteDataSource.saveProduct(savedLocalProduct) }
-        .onFailure { exception ->
-          println("Failed saving product to remote: $exception")
-        }
+    runCatching {
+      withTimeoutOrNull(2.seconds) {
+        remoteProductRemoteDataSource.saveProduct(savedLocalProduct)
+      }
+    }.onFailure { exception ->
+      println("Failed saving product to remote: $exception")
+    }
     return savedLocalProduct
   }
 
