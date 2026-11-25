@@ -47,6 +47,10 @@ class ProductRemoteDataSource : IProductRemoteDataSource {
     }
   }
 
+  override suspend fun deleteProduct(id: String) {
+    Firebase.firestore.collection(PRODUCTS_COLLECTION).document(id).delete()
+  }
+
   private companion object {
     const val PRODUCTS_COLLECTION = "products"
   }

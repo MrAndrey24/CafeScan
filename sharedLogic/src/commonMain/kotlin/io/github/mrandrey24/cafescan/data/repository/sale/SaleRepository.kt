@@ -48,9 +48,10 @@ class SaleRepository(
       withTimeoutOrNull(2.seconds) {
         remoteSaleDataSource.saveSaleRemote(savedLocalSale)
       }
-    }.onFailure { exception ->
-      println("Failed saving sale to remote: $exception")
     }
+        .onFailure { exception ->
+          println("Failed saving sale to remote: $exception")
+        }
     return savedLocalSale
   }
 
