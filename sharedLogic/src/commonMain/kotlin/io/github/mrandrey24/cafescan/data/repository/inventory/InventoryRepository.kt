@@ -26,12 +26,14 @@ package io.github.mrandrey24.cafescan.data.repository.inventory
 import io.github.mrandrey24.cafescan.data.local.inventory.IInventoryLocalDataSource
 import io.github.mrandrey24.cafescan.data.remote.inventory.IInventoryRemoteDataSource
 import io.github.mrandrey24.cafescan.domain.entities.StockItem
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.withTimeoutOrNull
 
 class InventoryRepository(
     private val localInventoryDataSource: IInventoryLocalDataSource,
@@ -74,10 +76,11 @@ class InventoryRepository(
   ) {
     localInventoryDataSource.updateStockAndPrice(productId, currentQty, price)
     runCatching {
-      remoteInventoryDataSource.updateStockAndPriceRemote(productId, currentQty, price)
+      withTimeoutOrNull(2.seconds) {
+        remoteInventoryDataSource.updateStockAndPriceRemote(productId, currentQty, price)
+      }
+    }.onFailure { exception ->
+      println("Failed updating remote stock and price: $exception")
     }
-        .onFailure { exception ->
-          println("Failed updating remote stock and price: $exception")
-        }
   }
 }

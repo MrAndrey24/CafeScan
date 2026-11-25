@@ -25,6 +25,7 @@ package io.github.mrandrey24.cafescan.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import io.github.mrandrey24.cafescan.domain.usecases.inventory.RestoreFromCloudUseCase
 import io.github.mrandrey24.cafescan.domain.usecases.sale.GetSalesSummaryUseCase
 import io.github.mrandrey24.cafescan.presentation.state.DashboardUiState
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -34,6 +35,7 @@ import kotlinx.coroutines.launch
 
 class SaleViewModel(
     private val getSalesSummaryUseCase: GetSalesSummaryUseCase,
+    private val restoreFromCloudUseCase: RestoreFromCloudUseCase,
 ) : ViewModel() {
   private val _uiState = MutableStateFlow(DashboardUiState())
   val uiState = _uiState.asStateFlow()
@@ -51,6 +53,7 @@ class SaleViewModel(
     viewModelScope.launch {
       _uiState.update { it.copy(isLoading = true, errorMessage = null) }
       try {
+        restoreFromCloudUseCase()
         val summary = getSalesSummaryUseCase(days)
         _uiState.update {
           it.copy(
