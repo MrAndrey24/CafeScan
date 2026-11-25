@@ -26,6 +26,7 @@ package io.github.mrandrey24.cafescan.presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.github.mrandrey24.cafescan.domain.usecases.inventory.GetAllActiveWithStockUseCase
+import io.github.mrandrey24.cafescan.domain.usecases.inventory.RestoreFromCloudUseCase
 import io.github.mrandrey24.cafescan.domain.usecases.product.DeleteProductUseCase
 import io.github.mrandrey24.cafescan.domain.usecases.stock.UpdateStockUseCase
 import io.github.mrandrey24.cafescan.presentation.state.InventoryUiState
@@ -39,6 +40,7 @@ class InventoryViewModel(
     private val getAllActiveWithStockUseCase: GetAllActiveWithStockUseCase,
     private val updateStockUseCase: UpdateStockUseCase,
     private val deleteProductUseCase: DeleteProductUseCase,
+    private val restoreFromCloudUseCase: RestoreFromCloudUseCase,
 ) : ViewModel() {
   private val _uiState = MutableStateFlow(InventoryUiState())
   val uiState: StateFlow<InventoryUiState> = _uiState.asStateFlow()
@@ -51,6 +53,7 @@ class InventoryViewModel(
     viewModelScope.launch {
       _uiState.update { it.copy(isLoading = true, errorMessage = null) }
       try {
+        restoreFromCloudUseCase()
         getAllActiveWithStockUseCase().collect { items ->
           _uiState.update { it.copy(items = items, isLoading = false) }
         }
@@ -60,7 +63,7 @@ class InventoryViewModel(
     }
   }
 
-  fun updateStockAndPrice(productId: Long, currentQty: Int, price: Double) {
+  fun updateStockAndPrice(productId: String, currentQty: Int, price: Double) {
     viewModelScope.launch {
       try {
         updateStockUseCase(productId, currentQty, price)
@@ -71,7 +74,7 @@ class InventoryViewModel(
     }
   }
 
-  fun deleteProduct(productId: Long) {
+  fun deleteProduct(productId: String) {
     viewModelScope.launch {
       try {
         deleteProductUseCase(productId)

@@ -28,7 +28,7 @@ import io.github.mrandrey24.cafescan.domain.entities.TopProduct
 import kotlinx.coroutines.flow.Flow
 
 interface ISaleRepository {
-  suspend fun saveSale(sale: Sale): Sale
+  suspend fun createSale(sale: Sale): Sale
 
   fun getSalesForDateRangeFlow(startMs: Long, endMs: Long): Flow<List<Sale>>
 

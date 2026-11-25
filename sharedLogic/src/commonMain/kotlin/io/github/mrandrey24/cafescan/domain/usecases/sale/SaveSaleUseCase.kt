@@ -28,6 +28,7 @@ import io.github.mrandrey24.cafescan.domain.entities.OrderItem
 import io.github.mrandrey24.cafescan.domain.entities.Sale
 import io.github.mrandrey24.cafescan.domain.usecases.scanner.DecrementStockUseCase
 import kotlin.time.Clock
+import kotlin.uuid.Uuid
 
 class SaveSaleUseCase(
     private val saleRepository: ISaleRepository,
@@ -35,8 +36,8 @@ class SaveSaleUseCase(
 ) {
   suspend operator fun invoke(items: List<OrderItem>): Sale {
     val now = Clock.System.now().toEpochMilliseconds()
-    val sale = Sale(id = now.toString(), items = items, timestamp = now)
-    val savedSale = saleRepository.saveSale(sale)
+    val sale = Sale(id = Uuid.random().toString(), items = items, timestamp = now)
+    val savedSale = saleRepository.createSale(sale)
 
     items.forEach { item -> decrementStockUseCase(item.product.id, item.quantity.toLong()) }
 

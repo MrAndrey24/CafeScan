@@ -26,6 +26,6 @@ package io.github.mrandrey24.cafescan.domain.usecases.scanner
 import io.github.mrandrey24.cafescan.data.repository.product.IProductRepository
 
 class DecrementStockUseCase(private val productRepository: IProductRepository) {
-  suspend operator fun invoke(productId: Long, qty: Long) =
+  suspend operator fun invoke(productId: String, qty: Long) =
       productRepository.decrementStock(productId, qty)
 }

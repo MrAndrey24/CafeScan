@@ -41,7 +41,7 @@ class SaleRemoteDataSource : ISaleRemoteDataSource {
       querySnapshot.documents
           .mapNotNull { doc ->
             try {
-              doc.data<Sale>()
+              doc.data<Sale>().copy(id = doc.id)
             } catch (_: Exception) {
               null
             }

@@ -35,6 +35,6 @@ val presentationModule = module {
   viewModel { ProductViewModel(get(), get()) }
   viewModel { QrViewModel(get()) }
   viewModel { ScannerViewModel(get(), get(), get()) }
-  viewModel { InventoryViewModel(get(), get(), get()) }
-  viewModel { SaleViewModel(get()) }
+  viewModel { InventoryViewModel(get(), get(), get(), get()) }
+  viewModel { SaleViewModel(get(), get()) }
 }

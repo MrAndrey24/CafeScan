@@ -67,7 +67,7 @@ class ScannerViewModel(
           return@launch
         }
 
-        val product = getProductByIdUseCase(payload.id.toLong())
+        val product = getProductByIdUseCase(payload.id)
 
         if (product == null) {
           _uiState.update { it.copy(scanError = ScanError.ProductNotFound) }
@@ -104,7 +104,7 @@ class ScannerViewModel(
       state.copy(
           basket =
               state.basket.map {
-                if (it.product.id == productId.toLong()) it.copy(quantity = it.quantity + 1) else it
+                if (it.product.id == productId) it.copy(quantity = it.quantity + 1) else it
               },
       )
     }
@@ -115,7 +115,7 @@ class ScannerViewModel(
       val updated =
           state.basket.mapNotNull {
             when {
-              it.product.id != productId.toLong() -> it
+              it.product.id != productId -> it
               it.quantity > 1 -> it.copy(quantity = it.quantity - 1)
               else -> null
             }
@@ -126,7 +126,7 @@ class ScannerViewModel(
 
   fun onRemoveItem(productId: String) {
     _uiState.update { state ->
-      val updated = state.basket.filterNot { it.product.id == productId.toLong() }
+      val updated = state.basket.filterNot { it.product.id == productId }
       state.copy(basket = updated)
     }
   }

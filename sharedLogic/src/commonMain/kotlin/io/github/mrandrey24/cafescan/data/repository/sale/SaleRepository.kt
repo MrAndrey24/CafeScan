@@ -27,12 +27,14 @@ import io.github.mrandrey24.cafescan.data.local.sale.ISaleLocalDataSource
 import io.github.mrandrey24.cafescan.data.remote.sale.ISaleRemoteDataSource
 import io.github.mrandrey24.cafescan.domain.entities.Sale
 import io.github.mrandrey24.cafescan.domain.entities.TopProduct
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.withTimeoutOrNull
 
 class SaleRepository(
     private val localSaleDataSource: ISaleLocalDataSource,
@@ -40,12 +42,15 @@ class SaleRepository(
     private val defaultDispatcher: CoroutineDispatcher = Dispatchers.Default,
 ) : ISaleRepository {
 
-  override suspend fun saveSale(sale: Sale): Sale {
+  override suspend fun createSale(sale: Sale): Sale {
     val savedLocalSale = localSaleDataSource.saveSale(sale)
-    runCatching { remoteSaleDataSource.saveSaleRemote(savedLocalSale) }
-        .onFailure { exception ->
-          println("Failed saving sale to remote: $exception")
-        }
+    runCatching {
+      withTimeoutOrNull(2.seconds) {
+        remoteSaleDataSource.saveSaleRemote(savedLocalSale)
+      }
+    }.onFailure { exception ->
+      println("Failed saving sale to remote: $exception")
+    }
     return savedLocalSale
   }
 

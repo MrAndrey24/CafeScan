@@ -38,7 +38,7 @@ class QrViewModel(private val getProductByIdUseCase: GetProductByIdUseCase) : Vi
   private val _uiState = MutableStateFlow(QrPreviewUiState())
   val uiState: StateFlow<QrPreviewUiState> = _uiState.asStateFlow()
 
-  fun loadProduct(productId: Long) {
+  fun loadProduct(productId: String) {
     viewModelScope.launch {
       _uiState.update {
         it.copy(product = null, qrBitmap = null, isLoading = true, errorMessage = null)

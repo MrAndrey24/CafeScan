@@ -238,9 +238,9 @@ fun HomeScreen(
         items(uiState.basket, key = { it.product.id }) { item ->
           OrderItemRow(
               item = item,
-              onIncrease = { viewModel.onIncreaseQty(item.product.id.toString()) },
-              onDecrease = { viewModel.onDecreaseQty(item.product.id.toString()) },
-              onRemove = { viewModel.onRemoveItem(item.product.id.toString()) },
+              onIncrease = { viewModel.onIncreaseQty(item.product.id) },
+              onDecrease = { viewModel.onDecreaseQty(item.product.id) },
+              onRemove = { viewModel.onRemoveItem(item.product.id) },
           )
         }
       }

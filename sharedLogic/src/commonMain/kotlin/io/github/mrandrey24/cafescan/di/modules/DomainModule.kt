@@ -24,6 +24,7 @@
 package io.github.mrandrey24.cafescan.di.modules
 
 import io.github.mrandrey24.cafescan.domain.usecases.inventory.GetAllActiveWithStockUseCase
+import io.github.mrandrey24.cafescan.domain.usecases.inventory.RestoreFromCloudUseCase
 import io.github.mrandrey24.cafescan.domain.usecases.product.CheckProductNameExistsUseCase
 import io.github.mrandrey24.cafescan.domain.usecases.product.DeleteProductUseCase
 import io.github.mrandrey24.cafescan.domain.usecases.product.SaveProductUseCase
@@ -40,6 +41,7 @@ val domainModule = module {
   factory { SaveProductUseCase(get()) }
   factory { CheckProductNameExistsUseCase(get()) }
   factory { GetAllActiveWithStockUseCase(get()) }
+  factory { RestoreFromCloudUseCase(get(), get(), get(), get()) }
   factory { UpdateStockUseCase(get()) }
   factory { DeleteProductUseCase(get()) }
   factory { CheckProductAvailabilityUseCase(get()) }

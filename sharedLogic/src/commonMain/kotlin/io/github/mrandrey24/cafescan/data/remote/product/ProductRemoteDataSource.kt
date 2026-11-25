@@ -31,7 +31,7 @@ import kotlinx.coroutines.flow.map
 
 class ProductRemoteDataSource : IProductRemoteDataSource {
   override suspend fun saveProduct(product: Product): Product {
-    Firebase.firestore.collection(PRODUCTS_COLLECTION).document(product.id.toString()).set(product)
+    Firebase.firestore.collection(PRODUCTS_COLLECTION).document(product.id).set(product)
     return product
   }
 
@@ -39,7 +39,7 @@ class ProductRemoteDataSource : IProductRemoteDataSource {
     return Firebase.firestore.collection(PRODUCTS_COLLECTION).snapshots().map { querySnapshot ->
       querySnapshot.documents.mapNotNull { doc ->
         try {
-          doc.data<Product>()
+          doc.data<Product>().copy(id = doc.id)
         } catch (_: Exception) {
           null
         }

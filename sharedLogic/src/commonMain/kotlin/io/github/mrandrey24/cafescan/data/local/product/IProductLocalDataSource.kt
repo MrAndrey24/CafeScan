@@ -32,13 +32,13 @@ interface IProductLocalDataSource {
 
   suspend fun getAllProducts(): List<Product>
 
-  suspend fun getProductById(id: Long): Product?
+  suspend fun getProductById(id: String): Product?
 
-  suspend fun getProductByStock(id: Long): Boolean
+  suspend fun getProductByStock(id: String): Boolean
 
   suspend fun getProductByName(name: String): Boolean
 
-  suspend fun deleteProduct(id: Long)
+  suspend fun deleteProduct(id: String)
 
-  suspend fun decrementStock(productId: Long, qty: Long)
+  suspend fun decrementStock(productId: String, qty: Long)
 }
