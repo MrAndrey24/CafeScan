@@ -29,5 +29,6 @@ import kotlinx.coroutines.flow.Flow
 interface IProductRemoteDataSource {
   suspend fun saveProduct(product: Product): Product
 
+  suspend fun deleteProduct(id: String)
   fun retrieveAllProducts(): Flow<List<Product>>
 }

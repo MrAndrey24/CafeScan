@@ -89,6 +89,13 @@ class ProductRepository(
 
   override suspend fun deleteProduct(id: String) {
     localProductDataSource.deleteProduct(id)
+    runCatching {
+      withTimeoutOrNull(2.seconds) {
+        remoteProductRemoteDataSource.deleteProduct(id)
+      }
+    }.onFailure { exception ->
+      println("Failed deleting product from remote: $exception")
+    }
   }
 
   override suspend fun decrementStock(productId: String, qty: Long) {
