@@ -36,6 +36,8 @@ interface IProductLocalDataSource {
 
   suspend fun getProductByStock(id: String): Boolean
 
+  suspend fun getProductWithAmountAvailability(id: String, amount: Long): Boolean
+
   suspend fun getProductByName(name: String): Boolean
 
   suspend fun deleteProduct(id: String)

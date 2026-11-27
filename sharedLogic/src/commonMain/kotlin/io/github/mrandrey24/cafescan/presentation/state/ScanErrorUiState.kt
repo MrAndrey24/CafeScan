@@ -29,4 +29,6 @@ sealed class ScanError {
   object ProductNotFound : ScanError()
 
   object OutOfStock : ScanError()
+
+  object InsufficientStock : ScanError()
 }

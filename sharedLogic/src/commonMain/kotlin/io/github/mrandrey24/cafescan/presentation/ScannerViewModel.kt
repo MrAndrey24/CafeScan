@@ -28,6 +28,7 @@ import androidx.lifecycle.viewModelScope
 import io.github.mrandrey24.cafescan.domain.entities.OrderItem
 import io.github.mrandrey24.cafescan.domain.entities.QrPayload
 import io.github.mrandrey24.cafescan.domain.usecases.sale.SaveSaleUseCase
+import io.github.mrandrey24.cafescan.domain.usecases.scanner.CheckProductAmountAvailabilityUseCase
 import io.github.mrandrey24.cafescan.domain.usecases.scanner.CheckProductAvailabilityUseCase
 import io.github.mrandrey24.cafescan.domain.usecases.scanner.GetProductByIdUseCase
 import io.github.mrandrey24.cafescan.presentation.state.LastSale
@@ -42,6 +43,7 @@ import kotlinx.coroutines.launch
 class ScannerViewModel(
     private val getProductByIdUseCase: GetProductByIdUseCase,
     private val checkProductAvailabilityUseCase: CheckProductAvailabilityUseCase,
+    private val checkProductAmountAvailabilityUseCase: CheckProductAmountAvailabilityUseCase,
     private val saveSaleUseCase: SaveSaleUseCase,
 ) : ViewModel() {
   private val _uiState = MutableStateFlow(ScannerUiState())
@@ -74,15 +76,20 @@ class ScannerViewModel(
           return@launch
         }
 
-        val existStock = checkProductAvailabilityUseCase(product.id)
+        val existing = _uiState.value.basket.find { it.product.id == product.id }
+        val targetQty = ((existing?.quantity ?: 0) + 1).toLong()
+        val existStock = checkProductAmountAvailabilityUseCase(product.id, targetQty)
 
         if (!existStock) {
-          _uiState.update { it.copy(scanError = ScanError.OutOfStock) }
+          _uiState.update {
+            it.copy(
+                scanError =
+                    if (existing == null) ScanError.OutOfStock else ScanError.InsufficientStock)
+          }
           return@launch
         }
 
         _uiState.update { state ->
-          val existing = state.basket.find { it.product.id == product.id }
           val updatedOrder =
               if (existing != null) {
                 state.basket.map {
@@ -100,13 +107,22 @@ class ScannerViewModel(
   }
 
   fun onIncreaseQty(productId: String) {
-    _uiState.update { state ->
-      state.copy(
-          basket =
-              state.basket.map {
-                if (it.product.id == productId) it.copy(quantity = it.quantity + 1) else it
-              },
-      )
+    val item = _uiState.value.basket.firstOrNull { it.product.id == productId } ?: return
+    val currentQty = item.quantity + 1.toLong()
+    viewModelScope.launch {
+      if (!checkProductAmountAvailabilityUseCase(productId, currentQty)) {
+        _uiState.update { it.copy(scanError = ScanError.InsufficientStock) }
+        return@launch
+      }
+      _uiState.update { state ->
+        state.copy(
+            basket =
+                state.basket.map {
+                  if (it.product.id == productId) it.copy(quantity = currentQty.toInt()) else it
+                },
+            scanError = null,
+        )
+      }
     }
   }
 

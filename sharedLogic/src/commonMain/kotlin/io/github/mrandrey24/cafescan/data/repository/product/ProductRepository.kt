@@ -84,6 +84,13 @@ class ProductRepository(
     return localProductDataSource.getProductByStock(id)
   }
 
+  override suspend fun retrieveProductWithAmountAvailability(
+      id: String,
+      amount: Long,
+  ): Boolean {
+    return localProductDataSource.getProductWithAmountAvailability(id, amount)
+  }
+
   override suspend fun isNameExists(name: String): Boolean {
     return localProductDataSource.getProductByName(name)
   }
