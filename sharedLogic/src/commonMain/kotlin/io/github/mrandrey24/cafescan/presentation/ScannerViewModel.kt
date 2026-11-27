@@ -77,8 +77,7 @@ class ScannerViewModel(
         }
 
         val existing = _uiState.value.basket.find { it.product.id == product.id }
-        val targetQty = ((existing?.quantity ?: 0) + 1).toLong()
-        val existStock = checkProductAmountAvailabilityUseCase(product.id, targetQty)
+        val existStock = checkProductAvailabilityUseCase(product.id)
 
         if (!existStock) {
           _uiState.update {
