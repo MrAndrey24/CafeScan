@@ -25,14 +25,18 @@ package io.github.mrandrey24.cafescan
 
 import android.app.Application
 import io.github.mrandrey24.cafescan.di.initKoin
+import org.jetbrains.compose.resources.ExperimentalResourceApi
+import org.jetbrains.compose.resources.setResourceReaderAndroidContext
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import qrgenerator.AppContext
 
 class MainApplication : Application() {
+  @OptIn(ExperimentalResourceApi::class)
   override fun onCreate() {
     super.onCreate()
 
+    setResourceReaderAndroidContext(this)
     AppContext.apply { set(applicationContext) }
 
     initKoin {

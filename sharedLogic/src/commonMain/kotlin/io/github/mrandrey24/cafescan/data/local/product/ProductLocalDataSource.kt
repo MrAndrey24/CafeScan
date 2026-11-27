@@ -134,6 +134,11 @@ class ProductLocalDataSource(
   override suspend fun getProductByStock(id: String): Boolean =
       dbQuery.findProductByStock(id).executeAsOne()
 
+  override suspend fun getProductWithAmountAvailability(
+      id: String,
+      amount: Long,
+  ): Boolean = dbQuery.isAvailabilityStockProduct(id, amount).executeAsOne()
+
   override suspend fun getProductByName(name: String): Boolean =
       dbQuery.findProductByName(name).executeAsOne()
 
