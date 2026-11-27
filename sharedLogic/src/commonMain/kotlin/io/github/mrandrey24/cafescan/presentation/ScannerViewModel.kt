@@ -84,7 +84,8 @@ class ScannerViewModel(
           _uiState.update {
             it.copy(
                 scanError =
-                    if (existing == null) ScanError.OutOfStock else ScanError.InsufficientStock)
+                    if (existing == null) ScanError.OutOfStock else ScanError.InsufficientStock,
+            )
           }
           return@launch
         }
